@@ -18,7 +18,7 @@ elif [ -f "/etc/debian_version" ] ; then
 fi
 
 exitHelp() {
-        echo "User adding script - copyright Tacajushi 2012 - v0.2.1"
+        echo "User adding script - copyright Tacajushi 2012"
         echo "Usage \"add [OPTION]\""
         echo ""
         echo "-n  set LOGIN / NICK"
@@ -91,6 +91,7 @@ isVNC() {
                 cp xstartup $DISK/$NICK/.vnc
                 chmod +x $DISK/$NICK/.vnc/xstartup
                 chown -R $NICK:$NICK $DISK/$NICK/
+                su - $NICK -c vncserver
 }
 
 isQuota() {
@@ -108,12 +109,10 @@ show() {
         if [ $RAPIDLEECH = "y" ] ; then
                 echo "Rapidleech: http://$IP/~$NICK/rl"
         fi
-        if [ $VNC = "y" ] ; then
-                su - $NICK -c vncserver
-        fi
-        if [ $PASSWORD = "y" ] ; then
-		echo "FTP: $IP"
-	fi
+        # if [ $VNC = "y" ] ; then
+        # trzeba by było jakieś parsowanie komendy VNC zrobić, żeby potem ładnie wyświetlało 
+        # fi
+    echo "FTP: $IP"
 	echo "panel: http://test.woox.pl"
 }
 
