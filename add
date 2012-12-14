@@ -4,7 +4,7 @@
 
 rtXMLRPC=/RPC`cat /dev/urandom | tr -dc 0-9 | head -c10`
 rtP=2`cat /dev/urandom | tr -dc 0-9 | head -c4`
-IP=`ifconfig  | egrep -o "([0-9]{1,3}\.){3}[0-9]{1,3}"`
+IP=`ifconfig  | egrep -o "([0-9]{1,3}\.){3}[0-9]{1,3}" | head -n1`
 DISK="/home"
 RTORRENT="n"
 RAPIDLEECH="n"
