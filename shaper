@@ -1,0 +1,183 @@
+#!/bin/bash
+
+# ZatrzymaÊ je∂li nie jest wykonywany z roota
+if [[ `whoami` != "root" ]]; then
+    echo "E: Skrypt shapera moøe byÊ wykonywany tylko z poziomu roota"
+    exit 1
+fi
+
+TC="/sbin/tc"
+IPTABLES="/sbin/iptables"
+DEV=eth0
+UPLOAD=8380219392	    # predkosc uploadu (830472192 = 99Mbit/s)
+DOWNLOAD=8380219392   # predkosc downloadu
+CHAIN=shaper
+
+modprobe ip_conntrack_ftp
+
+delete_chain () {
+    # kasujemy glowny chain shapera
+    $IPTABLES -t mangle -D OUTPUT  -o $DEV -j $CHAIN
+    $IPTABLES -t mangle -F $CHAIN
+    $IPTABLES -t mangle -X $CHAIN
+} &> /dev/null
+
+create_chain () {
+    $IPTABLES -t mangle -N $CHAIN
+    $IPTABLES -t mangle -I OUTPUT  -o $DEV -j $CHAIN
+}
+
+fw_rules () {
+    # === 1:10 ====
+    
+    $IPTABLES -t mangle -A $CHAIN -p icmp --icmp-type echo-request -j MARK --set-mark 10
+    $IPTABLES -t mangle -A $CHAIN -p tcp --tcp-flags SYN,ACK,FIN,RST SYN -j MARK --set-mark 10
+    $IPTABLES -t mangle -A $CHAIN -p tcp --tcp-flags SYN,ACK,FIN,RST SYN,ACK -j MARK --set-mark 10
+    $IPTABLES -t mangle -A $CHAIN -p tcp --dport domain -j MARK --set-mark 10
+    $IPTABLES -t mangle -A $CHAIN -p udp --dport domain -j MARK --set-mark 10
+    $IPTABLES -t mangle -A $CHAIN -p tcp --dport ssh -j MARK --set-mark 10			# SSH (tcp)
+    $IPTABLES -t mangle -A $CHAIN -p tcp --sport ssh -j MARK --set-mark 10			# SSH _z_ serwera
+
+    # === 1:11 ====
+    
+    $IPTABLES -t mangle -A $CHAIN -p tcp -m helper --helper ftp -j MARK --set-mark 11		# FTP
+    
+    # === 1:12 ====
+    
+    $IPTABLES -t mangle -A $CHAIN -p tcp --dport www -j MARK --set-mark 12
+    $IPTABLES -t mangle -A $CHAIN -p udp --dport www -j MARK --set-mark 12
+    $IPTABLES -t mangle -A $CHAIN -p tcp --sport www -j MARK --set-mark 12
+    $IPTABLES -t mangle -A $CHAIN -p udp --sport www -j MARK --set-mark 12
+
+    # === 1:18 ====
+
+    # ca≥y ruch wewnatrz ovh
+$IPTABLES -t mangle -A $CHAIN -d 46.36.196.0/24 -p tcp -j MARK --set-mark 18
+$IPTABLES -t mangle -A $CHAIN -d 46.36.197.0/24 -p tcp -j MARK --set-mark 18
+$IPTABLES -t mangle -A $CHAIN -d 46.36.198.0/24 -p tcp -j MARK --set-mark 18
+$IPTABLES -t mangle -A $CHAIN -d 46.105.0.0/16 -p tcp -j MARK --set-mark 18
+$IPTABLES -t mangle -A $CHAIN -d 46.166.144.0/24 -p tcp -j MARK --set-mark 18
+$IPTABLES -t mangle -A $CHAIN -d 46.166.145.0/24 -p tcp -j MARK --set-mark 18
+$IPTABLES -t mangle -A $CHAIN -d 62.245.0.0/19 -p tcp -j MARK --set-mark 18
+$IPTABLES -t mangle -A $CHAIN -d 77.111.192.0/20 -p tcp -j MARK --set-mark 18
+$IPTABLES -t mangle -A $CHAIN -d 77.111.192.0/21 -p tcp -j MARK --set-mark 18
+$IPTABLES -t mangle -A $CHAIN -d 77.111.208.0/23 -p tcp -j MARK --set-mark 18
+$IPTABLES -t mangle -A $CHAIN -d 77.111.210.0/23 -p tcp -j MARK --set-mark 18
+$IPTABLES -t mangle -A $CHAIN -d 77.111.240.0/21 -p tcp -j MARK --set-mark 18
+$IPTABLES -t mangle -A $CHAIN -d 77.111.248.0/21 -p tcp -j MARK --set-mark 18
+$IPTABLES -t mangle -A $CHAIN -d 87.98.128.0/17 -p tcp -j MARK --set-mark 18
+$IPTABLES -t mangle -A $CHAIN -d 87.98.128.0/18 -p tcp -j MARK --set-mark 18
+$IPTABLES -t mangle -A $CHAIN -d 87.98.192.0/19 -p tcp -j MARK --set-mark 18
+$IPTABLES -t mangle -A $CHAIN -d 87.98.192.0/20 -p tcp -j MARK --set-mark 18
+$IPTABLES -t mangle -A $CHAIN -d 87.98.216.0/21 -p tcp -j MARK --set-mark 18
+$IPTABLES -t mangle -A $CHAIN -d 91.90.88.0/21 -p tcp -j MARK --set-mark 18
+$IPTABLES -t mangle -A $CHAIN -d 91.121.0.0/16 -p tcp -j MARK --set-mark 18
+$IPTABLES -t mangle -A $CHAIN -d 91.121.0.0/17 -p tcp -j MARK --set-mark 18
+$IPTABLES -t mangle -A $CHAIN -d 91.121.0.0/18 -p tcp -j MARK --set-mark 18
+$IPTABLES -t mangle -A $CHAIN -d 91.218.20.0/22 -p tcp -j MARK --set-mark 18
+$IPTABLES -t mangle -A $CHAIN -d 91.218.204.0/22 -p tcp -j MARK --set-mark 18
+$IPTABLES -t mangle -A $CHAIN -d 94.23.0.0/16 -p tcp -j MARK --set-mark 18
+$IPTABLES -t mangle -A $CHAIN -d 109.235.144.0/24 -p tcp -j MARK --set-mark 18
+$IPTABLES -t mangle -A $CHAIN -d 176.31.0.0/16 -p tcp -j MARK --set-mark 18
+$IPTABLES -t mangle -A $CHAIN -d 176.31.128.0/17 -p tcp -j MARK --set-mark 18
+$IPTABLES -t mangle -A $CHAIN -d 178.32.0.0/15 -p tcp -j MARK --set-mark 18
+$IPTABLES -t mangle -A $CHAIN -d 178.236.224.0/20 -p tcp -j MARK --set-mark 18
+$IPTABLES -t mangle -A $CHAIN -d 188.165.0.0/16 -p tcp -j MARK --set-mark 18
+$IPTABLES -t mangle -A $CHAIN -d 192.166.140.0/22 -p tcp -j MARK --set-mark 18
+$IPTABLES -t mangle -A $CHAIN -d 193.28.233.0/24 -p tcp -j MARK --set-mark 18
+$IPTABLES -t mangle -A $CHAIN -d 193.84.187.0/24 -p tcp -j MARK --set-mark 18
+$IPTABLES -t mangle -A $CHAIN -d 193.104.19.0/24 -p tcp -j MARK --set-mark 18
+$IPTABLES -t mangle -A $CHAIN -d 193.104.19.0/25 -p tcp -j MARK --set-mark 18
+$IPTABLES -t mangle -A $CHAIN -d 193.104.56.0/24 -p tcp -j MARK --set-mark 18
+$IPTABLES -t mangle -A $CHAIN -d 193.104.205.0/24 -p tcp -j MARK --set-mark 18
+$IPTABLES -t mangle -A $CHAIN -d 193.105.73.0/24 -p tcp -j MARK --set-mark 18
+$IPTABLES -t mangle -A $CHAIN -d 193.200.52.0/23 -p tcp -j MARK --set-mark 18
+$IPTABLES -t mangle -A $CHAIN -d 194.50.82.0/24 -p tcp -j MARK --set-mark 18
+$IPTABLES -t mangle -A $CHAIN -d 194.105.152.0/23 -p tcp -j MARK --set-mark 18
+$IPTABLES -t mangle -A $CHAIN -d 194.213.8.0/24 -p tcp -j MARK --set-mark 18
+$IPTABLES -t mangle -A $CHAIN -d 195.60.164.0/23 -p tcp -j MARK --set-mark 18
+$IPTABLES -t mangle -A $CHAIN -d 195.110.30.0/23 -p tcp -j MARK --set-mark 18
+$IPTABLES -t mangle -A $CHAIN -d 195.206.236.0/23 -p tcp -j MARK --set-mark 18
+$IPTABLES -t mangle -A $CHAIN -d 195.246.232.0/23 -p tcp -j MARK --set-mark 18
+$IPTABLES -t mangle -A $CHAIN -d 195.246.254.0/23 -p tcp -j MARK --set-mark 18
+$IPTABLES -t mangle -A $CHAIN -d 213.186.32.0/19 -p tcp -j MARK --set-mark 18
+$IPTABLES -t mangle -A $CHAIN -d 213.251.128.0/18 -p tcp -j MARK --set-mark 18
+
+$IPTABLES -t mangle -A $CHAIN -d 178.32.132.0/24 -p tcp -j MARK --set-mark 18
+$IPTABLES -t mangle -A $CHAIN -d 188.127.224.0/19 -p tcp -j MARK --set-mark 18
+$IPTABLES -t mangle -A $CHAIN -d 188.127.253.0/24 -p tcp -j MARK --set-mark 18
+$IPTABLES -t mangle -A $CHAIN -d 213.251.145.0/24 -p tcp -j MARK --set-mark 18
+
+    #$IPTABLES -t mangle -A $CHAIN -m connmark --mark 100 -j MARK --set-mark 18
+
+}
+
+clear_shaper () {
+    $TC qdisc del dev $DEV root
+} &> /dev/null
+
+clear_police () {
+    $TC qdisc del dev $DEV ingress
+} &> /dev/null
+
+enable_shaper () {
+    DEFQUE=20	# domyslna kolejka
+    Q_COUNT=6	# liczba kolejek wychodzacych
+    R2Q=5	# parametr r2q w glownym qdisc na ingress
+    BURST=50	# powinno byc: rate/8/timer .. (?)
+    
+    # Klasy kolejek
+    $TC qdisc add dev $DEV root handle 1: htb default $DEFQUE r2q $R2Q
+    $TC class add dev $DEV parent 1: classid 1:1 htb rate ${UPLOAD}
+    $TC class add dev $DEV parent 1:1 classid 1:10 htb rate 10mbit ceil 100mbit prio 1
+    $TC class add dev $DEV parent 1:1 classid 1:11 htb rate 10mbit ceil 100mbit prio 2
+    $TC class add dev $DEV parent 1:1 classid 1:12 htb rate 10mbit ceil 100mbit prio 3
+    $TC class add dev $DEV parent 1:1 classid 1:18 htb rate 100mbit ceil 100mbit prio 4
+    # ruch torrent poza ovh (ograniczona predkosc do 25 mbit i najnizszy priorytet)
+    # wg mnie mozna predkosc zwiekszac w zaleznosci od tego, kiedy wlacza sie limit
+    # predkosci potrzebne do uzyskania limitu (3TB - 10mbit, 5TB - 16mbit, 10TB - 32mbit)
+    $TC class add dev $DEV parent 1:1 classid 1:20 htb rate 1mbit ceil 32mbit prio 5
+
+    # Dolaczanie algorytmow kolejkujacych do klas
+    $TC qdisc add dev $DEV parent 1:10 sfq perturb 10
+    $TC qdisc add dev $DEV parent 1:11 sfq perturb 10
+    $TC qdisc add dev $DEV parent 1:12 sfq perturb 10
+    $TC qdisc add dev $DEV parent 1:18 sfq perturb 10
+    $TC qdisc add dev $DEV parent 1:20 sfq perturb 10
+
+    tc filter add dev eth0 parent 1: protocol ip prio 1 handle 10 fw flowid 1:10
+    tc filter add dev eth0 parent 1: protocol ip prio 1 handle 11 fw flowid 1:11
+    tc filter add dev eth0 parent 1: protocol ip prio 1 handle 12 fw flowid 1:12
+    tc filter add dev eth0 parent 1: protocol ip prio 1 handle 18 fw flowid 1:18
+    tc filter add dev eth0 parent 1: protocol ip prio 1 handle 20 fw flowid 1:20
+
+    # Uruchomienie regul w firewallu
+    fw_rules
+}
+
+enable_police () {
+    $TC qdisc add dev $DEV handle ffff: ingress
+    $TC filter add dev $DEV parent ffff: protocol ip prio 50 u32 \
+	match ip src 0.0.0.0/0 police rate 900000 burst 10k drop flowid :1
+}
+
+case $1 in 
+    off)
+	delete_chain
+	clear_shaper
+#	clear_police
+	;;
+    on)
+	delete_chain
+	clear_shaper
+#	clear_police
+	create_chain
+	enable_shaper
+#	enable_police
+	;;
+    *)
+	echo "Uzycie: $0 {off|on}"
+	;;
+esac
+
+# vim: nowrap   

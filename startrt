@@ -1,0 +1,111 @@
+#!/bin/bash
+
+# Wersja 1.1.2
+
+ACTION=$1
+USER=$2
+
+checkUser() {
+	NORMAL=`ps aux | grep $USER | grep rtorrent | wc -l`
+	ID=`id $USER | awk '{print $1}' | egrep -o '[0-9]{4,5}' | head -n1`
+	BYID=`ps aux | grep rtorrent | awk '{print $1}' | grep $ID | wc -l`
+}
+
+startRt() {
+	checkUser
+		if [ $NORMAL != '0' ] || [ $BYID != '0' ] ; then
+			echo "$USER - rtorrent jest już uruchomiony"
+		else
+			su $USER -c "screen -dmS rtorrent rtorrent"
+			echo "$USER - czekam 5 sekund na potwierdzenie działania rtorrenta"
+			sleep 5s
+				checkUser
+				if [ $NORMAL != '0' ] || [ $BYID != '0' ] ; then
+					echo "$USER - rtorrent został prawidłowo uruchomiony"
+				else
+					echo "$USER - kasuje pliki rtorrenta i sesji screen"
+					rm -f /home*/$USER/rtorrent/session/rpc.socket
+					rm -f /home*/$USER/rtorrent/session/rtorrent.lock
+					rm -fr /var/run/screen/S-$USER
+					su $USER -c "screen -dmS rtorrent rtorrent"
+					echo "$USER - czekam 5 sekund na potwierdzenie działania rtorrenta"
+					sleep 5s
+					checkUser
+						if [ $NORMAL != '0' ] || [ $BYID != '0' ] ; then
+							echo "$USER - rtorrent został prawidłowo uruchomiony"
+						else
+							echo "$USER - rtorrent wciąż nie działa musisz się przyjrzeć temu problemowi"
+						fi
+				fi
+		fi
+}
+
+stopRt() {
+	checkUser
+	if [ $NORMAL = '0' ] && [ $BYID = '0' ] ; then
+		echo "$USER - rtorrent jest już zatrzymany"
+	else
+		su $USER -c "killall rtorrent"
+		echo "$USER - rtorrent został zatrzymany"
+	fi
+}
+
+restartRt() {
+	stopRt
+	sleep 2s
+	startRt
+}
+
+statusRt() {
+	checkUser
+	if [ $NORMAL = '0' ] && [ $BYID = '0' ] ; then
+		echo "(0) $USER"
+	elif [ $NORMAL != '0' ] || [ $BYID != '0' ] ; then
+		echo "(1) $USER"
+	fi
+}
+
+if [ $USER = "all" ] ; then
+	if [ -e exclude ] ; then
+		:
+	else
+		touch exclude
+	fi
+	if [ $ACTION = "start" ] ; then
+		for rtUsers in /var/rutorrent/rutorrent/conf/users/* ; do
+			rtUsers=`echo $rtUsers | sed -e 's/\/var\/rutorrent\/rutorrent\/conf\/users\///g'`
+			if [ `cat exclude | grep $rtUsers | wc -l` != 1 ] ; then
+				/root/startrt start $rtUsers
+			else
+				echo "$rtUsers ma wyłączone konto"
+			fi
+		done
+	elif [ $ACTION = "stop" ] ; then
+		for rtUsers in /var/rutorrent/rutorrent/conf/users/* ; do
+			rtUsers=`echo $rtUsers | sed -e 's/\/var\/rutorrent\/rutorrent\/conf\/users\///g'`
+			/root/startrt stop $rtUsers
+		done
+	elif [ $ACTION = "restart" ] ; then
+		for rtUsers in /var/rutorrent/rutorrent/conf/users/* ; do
+			rtUsers=`echo $rtUsers | sed -e 's/\/var\/rutorrent\/rutorrent\/conf\/users\///g'`
+			/root/startrt restart $rtUsers
+		done
+	elif [ $ACTION = "status" ] ; then
+		for rtUsers in /var/rutorrent/rutorrent/conf/users/* ; do
+			rtUsers=`echo $rtUsers | sed -e 's/\/var\/rutorrent\/rutorrent\/conf\/users\///g'`
+			/root/startrt status $rtUsers
+		done
+	fi
+fi
+
+if [ $USER != "all" ] ; then
+	if [ $ACTION = "start" ] ; then
+		startRt
+	elif [ $ACTION = "stop" ] ; then
+		stopRt
+	elif [ $ACTION = "restart" ] ; then
+		restartRt
+	elif [ $ACTION = "status" ] ; then
+		statusRt
+	fi
+fi

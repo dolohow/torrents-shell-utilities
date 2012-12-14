@@ -1,0 +1,9 @@
+#!/bin/bash
+
+openssl s_client -connect $1 | tee ssl
+openssl x509 -inform PEM -in ssl -out outcert.pem
+cp outcert.pem /etc/ssl/certs/$2.crt
+cp outcert.pem /usr/share/ca-certificates/$2.crt
+echo "$2.crt" >> /etc/ca-certificates.conf
+c_rehash
+update-ca-certificates
