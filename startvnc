@@ -1,0 +1,58 @@
+#!/bin/bash
+
+# Wersja 0.1
+
+ACTION=$1
+USER=$2
+
+checkUser() {
+	VNCPORT=`ps aux | grep $USER | egrep -o "Xvnc[4]{0,1} \:[0-9]{1,2}" | awk '{print $2}'`
+	ISSTARTED=`ps aux | grep $USER | grep Xvnc | wc -l`
+	HAVEVNC=`cat vnclist | grep $USER | wc -l`
+	IP=`ifconfig  | egrep -o "([0-9]{1,3}\.){3}[0-9]{1,3}" | head -n1`
+	if [ -e vnclist ] ; then
+		:
+	else
+		touch vnclist
+	fi
+	if [ $HAVEVNC = '0' ] ; then
+		echo "$USER - nie posiada vnc"
+		exit
+	fi
+}
+
+startVNC() {
+	checkUser
+	if [ $ISSTARTED != '0' ] ; then
+		echo "$USER - vnc jest już uruchomione"
+	else
+		su $USER -c "vncserver 2> /dev/null"
+		checkUser
+		echo "$USER - vnc zostało prawidłowo uruchomione"
+		echo "Adres: $IP:$VNCPORT"
+	fi
+}
+
+stopVNC() {
+	checkUser
+	if [ $ISSTARTED = '0' ] ; then
+		echo "$USER - vnc jest już zatrzymane"
+	else
+		su $USER -c "vncserver -kill $VNCPORT 2> /dev/null"
+		echo "$USER - vnc zostało zatrzymane"
+	fi
+}
+
+restartVNC() {
+	stopVNC
+	sleep 2s
+	startVNC
+}
+
+if [ $ACTION = 'start' ] ; then
+	startVNC
+elif [ $ACTION = 'stop' ] ; then
+	stopVNC
+elif [ $ACTION = 'restart' ] ; then
+	restartVNC
+fi
