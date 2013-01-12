@@ -52,7 +52,7 @@ stopRt() {
 
 restartRt() {
 	stopRt
-	sleep 2s
+	sleep 5s
 	startRt
 }
 
