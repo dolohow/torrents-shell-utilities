@@ -118,6 +118,7 @@ show() {
         fi
         if [ $VNC = "y" ] ; then
             ./startvnc start $NICK
+        fi
 	echo "FTP: $IP"
 	echo "panel: http://test.woox.pl"
 }
