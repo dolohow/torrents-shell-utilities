@@ -18,17 +18,19 @@ elif [ -f "/etc/debian_version" ] ; then
 fi
 
 exitHelp() {
-        echo "User adding script - copyright Tacajushi 2012"
-        echo "Usage \"add [OPTION]\""
-        echo ""
-        echo "-n  set LOGIN / NICK"
-        echo "-p  set PASSWORD"
-        echo "-d  set DISK (e.g /home)"
-        echo "-q  set QUOTA"
-        echo "-mp set mountpoint (default: /home)"
-        echo "-r  install rtorrent"
-        echo "-rl install rapidleech from svn"
-        echo "-v  install VNC"
+	cat << EOF
+User adding script - copyright Tacajushi 2012
+Usage add [OPTION]
+    -n  set LOGIN / NICK
+    -p  set PASSWORD
+    -d  set DISK (e.g /home)
+    -q  set QUOTA
+    -mp set mountpoint (default: /home)
+    -r  install rtorrent
+    -rl install rapidleech from svn
+    -v  install VNC
+EOF
+exit
 }
 
 isNick() {
@@ -38,15 +40,19 @@ isNick() {
 
 isRtorrent() {
                 mkdir /var/rutorrent/rutorrent/conf/users/$NICK
-                echo "<?php
-                \$scgi_port = 0;
-                \$scgi_host = \"unix://$DISK/$NICK/rtorrent/session/rpc.socket\";
-                \$XMLRPCMountPoint = \"$rtXMLRPC\";
-                ?>" > /var/rutorrent/rutorrent/conf/users/$NICK/config.php
                 mkdir $DISK/$NICK/downloads
                 mkdir $DISK/$NICK/rtorrent
                 mkdir $DISK/$NICK/rtorrent/session
-                echo "execute = {sh,-c,rm -f $DISK/$NICK/rtorrent/session/rpc.socket}
+                
+                cat > /var/rutorrent/rutorrent/conf/users/$NICK/config.php << EOF 
+                <?php
+                \$scgi_port = 0;
+                \$scgi_host = \"unix://$DISK/$NICK/rtorrent/session/rpc.socket\";
+                \$XMLRPCMountPoint = \"$rtXMLRPC\";
+                ?>
+EOF
+                cat > $DISK/$NICK/.rtorrent.rc << EOF
+                execute = {sh,-c,rm -f $DISK/$NICK/rtorrent/session/rpc.socket}
                 scgi_local = $DISK/$NICK/rtorrent/session/rpc.socket
                 execute = {sh,-c,chmod 0666 $DISK/$NICK/rtorrent/session/rpc.socket}
                 encoding_list = UTF-8
@@ -57,7 +63,8 @@ isRtorrent() {
                 session = $DISK/$NICK/rtorrent/session
                 dht = disable
                 peer_exchange = no
-                execute = {sh,-c,/usr/bin/php /var/rutorrent/rutorrent/php/initplugins.php $NICK &}" > $DISK/$NICK/.rtorrent.rc
+                execute = {sh,-c,/usr/bin/php /var/rutorrent/rutorrent/php/initplugins.php $NICK &}
+EOF
                 if [ $PROCESS != NULL ] ; then
 			echo "scheduler.max_active.set = $PROCESS" >> $DISK/$NICK/.rtorrent.rc
 		fi
@@ -91,7 +98,7 @@ isVNC() {
                 cp xstartup $DISK/$NICK/.vnc
                 chmod +x $DISK/$NICK/.vnc/xstartup
                 chown -R $NICK:$NICK $DISK/$NICK/
-                su - $NICK -c vncserver
+                echo $NICK >> vnclist
 }
 
 isQuota() {
@@ -109,10 +116,9 @@ show() {
         if [ $RAPIDLEECH = "y" ] ; then
                 echo "Rapidleech: http://$IP/~$NICK/rl"
         fi
-        # if [ $VNC = "y" ] ; then
-        # trzeba by było jakieś parsowanie komendy VNC zrobić, żeby potem ładnie wyświetlało 
-        # fi
-    echo "FTP: $IP"
+        if [ $VNC = "y" ] ; then
+            ./startvnc start $NICK
+	echo "FTP: $IP"
 	echo "panel: http://test.woox.pl"
 }
 
