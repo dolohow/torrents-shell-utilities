@@ -10,9 +10,7 @@ checkUser() {
 	ISSTARTED=`ps aux | grep $USER | grep Xvnc | wc -l`
 	HAVEVNC=`cat vnclist | grep $USER | wc -l`
 	IP=`ifconfig  | egrep -o "([0-9]{1,3}\.){3}[0-9]{1,3}" | head -n1`
-	if [ -e vnclist ] ; then
-		:
-	else
+	if [ ! -e vnclist ] ; then
 		touch vnclist
 	fi
 	if [ $HAVEVNC = '0' ] ; then

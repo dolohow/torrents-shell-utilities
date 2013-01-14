@@ -66,9 +66,7 @@ statusRt() {
 }
 
 if [ $USER = "all" ] ; then
-	if [ -e exclude ] ; then
-		:
-	else
+	if [ ! -e exclude ] ; then
 		touch exclude
 	fi
 	if [ $ACTION = "start" ] ; then
