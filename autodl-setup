@@ -104,7 +104,7 @@ LIGHTTPD_URL="http://download.lighttpd.net/lighttpd/releases-1.4.x/$LIGHTTPD_NAM
 MOD_SCGI_VERSION="1.14"
 MOD_SCGI_URL="http://python.ca/scgi/releases/scgi-$MOD_SCGI_VERSION.tar.gz"
 
-UNRAR_VERSION="4.2.0"
+UNRAR_VERSION="4.2.4"
 UNRAR_URL="http://www.rarlab.com/rar/unrarsrc-$UNRAR_VERSION.tar.gz"
 
 # Dirs relative to user's home directory
@@ -153,7 +153,7 @@ USE_ENCRYPTED_FTP=n
 INSTALL_WEBMIN=n
 USER_TIMEZONE=
 
-RUTORRENT_SITE_REALM="My ruTorrent web site"
+RUTORRENT_SITE_REALM="WooX.pl"
 AUTODL_STARTUP_DESC="Start autodl-irssi and rtorrent"
 PHPCGI_STARTUP_DESC="Start php-cgi"
 NGINX_STARTUP_DESC="Start nginx"
