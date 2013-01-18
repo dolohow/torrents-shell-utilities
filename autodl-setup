@@ -1640,11 +1640,11 @@ EOF
 
 lighttpdWriteConfFile() {
 	cat > $LIGHTTPD_CONF << EOF
-server.follow-symlink = "disable"
+server.follow-symlink = "enable"
 server.max-connections = 512
 server.max-fds = 1024
 server.max-keep-alive-idle = 15
-dir-listing.activate = "disable"
+dir-listing.activate = "enable"
 server.pid-file = "$LIGHTTPD_PID_FILE"
 server.errorlog = "$LIGHTTPD_ERROR_LOG"
 accesslog.filename = "$LIGHTTPD_ACCESS_LOG"
@@ -1754,7 +1754,7 @@ auth.backend = "htpasswd"
 auth.backend.htpasswd.userfile = "$WWW_PASSWORD_FILE"
 auth.require = (
 $(lighttpdGetRpcRequire)
-	"/" => (
+	"/rutorrent" => (
 		"method" => "basic",
 		"realm" => "$RUTORRENT_SITE_REALM",
 		"require" => "valid-user",
