@@ -34,7 +34,17 @@ startRt() {
 						if [ $NORMAL != '0' ] || [ $BYID != '0' ] ; then
 							echo "$USER - rtorrent został prawidłowo uruchomiony"
 						else
-							echo "$USER - rtorrent wciąż nie działa musisz się przyjrzeć temu problemowi"
+							echo "$USER - Usuwam wszystkie załadowane torrenty"
+							rm -rf /home*/$USER/rtorrent/session/*
+							su $USER -c "screen -dmS rtorrent rtorrent"
+							echo "$USER - czekam 5 sekund na potwierdzenie działania rtorrenta"
+							sleep 5s
+							checkUser
+							if [ $NORMAL != '0' ] || [ $BYID != '0' ] ; then
+								echo "$USER - rtorrent został prawidłowo uruchomiony"
+							else
+								echo "$USER - rtorrent wciąż nie działa muszę się przyjrzeć temu problemowi"
+							fi
 						fi
 				fi
 		fi
