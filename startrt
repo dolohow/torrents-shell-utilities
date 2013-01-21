@@ -104,9 +104,8 @@ if [ $USER = "all" ] ; then
 			/root/startrt status $rtUsers
 		done
 	fi
-fi
 
-if [ $USER != "all" ] ; then
+elif [ $USER != "all" ] ; then
 	if [ $ACTION = "start" ] ; then
 		startRt
 	elif [ $ACTION = "stop" ] ; then
