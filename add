@@ -92,7 +92,6 @@ isVNC() {
                 chmod +x $DISK/$NICK/.vnc/xstartup
                 chown -R $NICK:$NICK $DISK/$NICK/
                 echo $NICK >> vnclist
-                su $NICK -c vncserver
 }
 
 isQuota() {
@@ -154,4 +153,6 @@ while [ $# -gt 0 ] ; do
         else
                 exitHelp
         fi
-done 
+done
+
+show
