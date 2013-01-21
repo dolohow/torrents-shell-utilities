@@ -56,12 +56,33 @@ statusVNC() {
 	fi
 }
 
-if [ $ACTION = 'start' ] ; then
-	startVNC
-elif [ $ACTION = 'stop' ] ; then
-	stopVNC
-elif [ $ACTION = 'restart' ] ; then
-	restartVNC
-elif [ $ACTION = 'status' ] ; then
-	statusVNC
+if [ $USER = "all" ] ; then
+	if [ $ACTION = "start" ] ; then
+		for i in `cat vnclist` ; do
+			/root/startvnc start $i
+		done
+	elif [ $ACTION = "stop" ] ; then
+		for i in `cat vnclist` ; do
+			/root/startvnc stop $i
+		done
+	elif [ $ACTION = "restart" ] ; then
+		for i in `cat vnclist` ; do
+			/root/startvnc restart $i
+		done
+	elif [ $ACTION = "status" ] ; then
+		for i in `cat vnclist` ; do
+			/root/startvnc status $i
+		done
+	fi
+
+elif [ $USER != "all" ] ; then
+	if [ $ACTION = 'start' ] ; then
+		startVNC
+	elif [ $ACTION = 'stop' ] ; then
+		stopVNC
+	elif [ $ACTION = 'restart' ] ; then
+		restartVNC
+	elif [ $ACTION = 'status' ] ; then
+		statusVNC
+	fi
 fi
