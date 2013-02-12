@@ -6,7 +6,7 @@ ACTION=$1
 USER=$2
 
 checkUser() {
-	EXIST=`ls /var/rutorrent/rutorrent/conf/users | grep -w vion | wc -l`
+	EXIST=`ls /var/rutorrent/rutorrent/conf/users | grep -w $USER | wc -l`
 	if [ $EXIST = '0' ] ; then
 		echo "$USER - nie posiada rtorrenta"
 		exit
