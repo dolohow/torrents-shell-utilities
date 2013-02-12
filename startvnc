@@ -1,14 +1,12 @@
 #!/bin/bash
 
-# Wersja 0.1
-
 ACTION=$1
 USER=$2
 
 checkUser() {
 	VNCPORT=`ps aux | grep $USER | egrep -o "Xvnc[4]{0,1} \:[0-9]{1,2}" | awk '{print $2}'`
 	ISSTARTED=`ps aux | grep $USER | grep Xvnc | wc -l`
-	HAVEVNC=`cat vnclist | grep $USER | wc -l`
+	HAVEVNC=`cat vnclist | grep  -w $USER | wc -l`
 	IP=`ifconfig  | egrep -o "([0-9]{1,3}\.){3}[0-9]{1,3}" | head -n1`
 	if [ ! -e vnclist ] ; then
 		touch vnclist
