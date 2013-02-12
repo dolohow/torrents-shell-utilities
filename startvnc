@@ -27,7 +27,7 @@ startVNC() {
 		su $USER -c "vncserver 2> /dev/null"
 		checkUser
 		echo "$USER - vnc zostało prawidłowo uruchomione"
-		echo "Adres: $IP$VNCPORT"
+		echo "VNC: $IP$VNCPORT"
 	fi
 }
 
