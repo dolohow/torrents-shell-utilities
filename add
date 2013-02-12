@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# 1.2.2
+# 1.2.4
 
 rtXMLRPC=/RPC`cat /dev/urandom | tr -dc 0-9 | head -c10`
 rtP=2`cat /dev/urandom | tr -dc 0-9 | head -c4`
@@ -68,7 +68,7 @@ isRtorrent() {
                 elif [ $OS = "gentoo" ] ; then
                         cat 1 >> /etc/lighttpd/rutorrent_passwd
                 fi
-                ./startrt start $NICK
+                ./startrt start $NICK > /dev/null
 }
 
 isRapidleech() {
