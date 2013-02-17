@@ -1,33 +1,28 @@
 #!/bin/bash
 
-# 1.1.3
-
 USER=$1
 
 createArchive() {
-	tar -cf $USER.tar /var/rutorrent/rutorrent/share/users/$USER
-	gzip $USER.tar
 	mkdir /root/archiwum/$USER
-	mv $USER.tar.gz /root/archiwum/$USER
 	updatedb
-	locate $USER > /root/archiwum/$USER/$USER.data
+	locate $USER > /root/archiwum/$USER/$USER.torrents
 	if [ -f "/etc/gentoo-release" ] ; then
-		cat /var/log/lighttpd/access.log | grep $USER | egrep -o '([0-9]{1,3}\.){3}[0-9]{1,3}' | sort -u >> /root/archiwum/$USER/$USER.ip
+		cat /var/log/lighttpd/access.log | grep $USER | egrep -o '([0-9]{1,3}\.){3}[0-9]{1,3}' | sort -u > /root/archiwum/$USER/$USER.ip
 		zcat /var/log/lighttpd/*gz | grep $USER | egrep -o '([0-9]{1,3}\.){3}[0-9]{1,3}' | sort -u >> /root/archiwum/$USER/$USER.ip
 	elif [ -f "/etc/debian_version" ] ; then
 		cat /usr/local/lighttpd/logs/access.log | grep $USER | egrep -o '([0-9]{1,3}\.){3}[0-9]{1,3}' | sort -u >> /root/archiwum/$USER/$USER.ip
 		cat /usr/local/lighttpd/logs/access.log.1 | grep $USER | egrep -o '([0-9]{1,3}\.){3}[0-9]{1,3}' | sort -u >> /root/archiwum/$USER/$USER.ip
 		zcat /usr/local/lighttpd/logs/*gz | grep $USER | egrep -o '([0-9]{1,3}\.){3}[0-9]{1,3}' | sort -u >> /root/archiwum/$USER/$USER.ip
 	fi
-	cat /root/archiwum/$USER/$USER.data | sort -u > /root/archiwum/$USER.ip-new
-	mv /root/archiwum/$USER.ip-new /root/archiwum/$USER/$USER.data
+	cat /root/archiwum/$USER/$USER.ip | sort -u > /root/archiwum/$USER.ip-new
+	mv /root/archiwum/$USER.ip-new /root/archiwum/$USER/$USER.ip
 }
 
 
-pkill -u $USER
-userdel -r $USER
-rm -r /var/rutorrent/rutorrent/conf/users/$USER
-rm -r /var/run/screen/$USER
+pkill -SIGKILL -u $USER
+userdel -rf $USER
+rm -rf /var/rutorrent/rutorrent/conf/users/$USER
+rm -rf /var/run/screen/$USER
 
 if [ -d /root/archiwum ] ; then
 	createArchive
@@ -36,7 +31,7 @@ else
 	createArchive
 fi
 
-rm -r /home/$USER
+rm -rf /home/$USER
 if [ -d /home2 ] ; then
-	rm -r /home2/$USER
+	rm -rf /home2/$USER
 fi
