@@ -9,7 +9,7 @@ checkUser() {
 		echo "$USER - nie posiada rtorrenta"
 		exit
 	fi
-	ISSTARTED=`pgrep -u $USER | wc -l`
+	ISSTARTED=`pgrep -u $USER rtorrent | wc -l`
 }
 
 startRt() {
@@ -53,11 +53,10 @@ startRt() {
 
 stopRt() {
 	checkUser
-	if [ $ISSTARTED != '0' ] ; then
+	if [ $ISSTARTED = '0' ] ; then
 		echo "$USER - rtorrent jest już zatrzymany"
-		
 	else
-		su $USER -c "killall rtorrent"
+	 	pkill -u $USER rtorrent
 		echo "$USER - rtorrent został zatrzymany"
 	fi
 }
@@ -72,7 +71,7 @@ statusRt() {
 	checkUser
 	if [ $ISSTARTED = '0' ] ; then
 		echo "(0) $USER"
-	elif [ $ISSTARTED != '0' ] ; then
+	else
 		echo "(1) $USER"
 	fi
 }
