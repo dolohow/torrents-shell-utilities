@@ -56,7 +56,7 @@ stopRt() {
 	if [ $ISSTARTED = '0' ] ; then
 		echo "$USER - rtorrent jest już zatrzymany"
 	else
-	 	pkill -u $USER rtorrent
+	 	pkill -SIGKILL -u $USER rtorrent
 		echo "$USER - rtorrent został zatrzymany"
 	fi
 }
