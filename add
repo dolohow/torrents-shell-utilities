@@ -113,7 +113,7 @@ show() {
             ./startvnc start $NICK
         fi
     echo "FTP: $IP"
-    echo "panel: http://test.woox.pl"
+    echo "panel: http://woox.pl"
 }
 
 while [ $# -gt 0 ] ; do
