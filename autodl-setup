@@ -1759,6 +1759,12 @@ $(lighttpdGetRpcRequire)
 		"realm" => "$RUTORRENT_SITE_REALM",
 		"require" => "valid-user",
 	),
+    "/~" => (
+        "method" => "basic",
+        "realm" => "WooX.pl",
+        "require" => "valid-user",
+    ),
+
 )
 
 $(lighttpdGetScgiServerTable)
