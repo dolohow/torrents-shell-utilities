@@ -49,7 +49,7 @@ statusVNC() {
 	checkUser
 	if [ $ISSTARTED = '0' ] ; then
 		echo "(0) $USER"
-	elif [ $ISSTARTED >= '1' ] ; then
+	elif [ $ISSTARTED > '0' ] ; then
 		echo "(1) $USER - $IP$VNCPORT"
 	fi
 }
