@@ -1,6 +1,8 @@
 #!/bin/bash
 
 USER=$1
+HAVEVNC=`cat vnclist | grep -x $USER | wc -l`
+HAVERT=`ls /var/rutorrent/rutorrent/conf/users | grep -w $USER | wc -l`
 
 createArchive() {
 	mkdir /root/archiwum/$USER
@@ -19,16 +21,24 @@ createArchive() {
 }
 
 
-pkill -SIGKILL -u $USER
-userdel -rf $USER
-rm -rf /var/rutorrent/rutorrent/conf/users/$USER
-rm -rf /var/run/screen/$USER
+
 
 if [ -d /root/archiwum ] ; then
 	createArchive
 else
 	mkdir /root/archiwum
 	createArchive
+fi
+
+pkill -SIGKILL -u $USER
+userdel -rf $USER
+rm -rf /var/rutorrent/rutorrent/conf/users/$USER
+rm -rf /var/run/screen/$USER
+
+if [ $HAVEVNC != '0' ] ; then
+	sed /$USER/d vnclist > tmp
+	cat tmp > vnclits
+    rm tmp
 fi
 
 rm -rf /home/$USER
