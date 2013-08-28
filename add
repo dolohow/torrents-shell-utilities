@@ -1,158 +1,143 @@
 #!/bin/bash
 
-# 1.2.4
-
-rtXMLRPC=/RPC`cat /dev/urandom | tr -dc 0-9 | head -c10`
-rtP=2`cat /dev/urandom | tr -dc 0-9 | head -c4`
 IP=`ifconfig  | egrep -o "([0-9]{1,3}\.){3}[0-9]{1,3}" | head -n1`
 DISK="/home"
 RTORRENT="n"
 RAPIDLEECH="n"
 VNC="n"
+DELUGE="n"
 MOUNTPOINT="/home"
 
 if [ -f "/etc/gentoo-release" ] ; then
-        OS=gentoo
+  OS=gentoo
 elif [ -f "/etc/debian_version" ] ; then
-        OS=debian
+  OS=debian
 fi
 
-exitHelp() {
-        echo "User adding script - copyright Tacajushi 2012"
-        echo "Usage \"add [OPTION]\""
-        echo ""
-        echo "-n  set LOGIN / NICK"
-        echo "-p  set PASSWORD"
-        echo "-d  set DISK (e.g /home)"
-        echo "-q  set QUOTA"
-        echo "-mp set mountpoint (default: /home)"
-        echo "-r  install rtorrent"
-        echo "-rl install rapidleech from svn"
-        echo "-v  install VNC"
+create_user() {
+  mkdir $DISK/$NICK
+  useradd -d $DISK/$NICK $NICK
 }
 
-isNick() {
-    mkdir $DISK/$NICK
-    useradd -d $DISK/$NICK $NICK
+set_rtorrent() {
+  XMLRPC=/RPC`cat /dev/urandom | tr -dc 0-9 | head -c10`
+  PORT=2`cat /dev/urandom | tr -dc 0-9 | head -c4`
+  mkdir /var/rutorrent/rutorrent/conf/users/$NICK
+  echo "<?php
+  \$scgi_port = 0;
+  \$scgi_host = \"unix://$DISK/$NICK/rtorrent/rpc.socket\";
+  \$XMLRPCMountPoint = \"$XMLRPC\";
+  ?>" > /var/rutorrent/rutorrent/conf/users/$NICK/config.php
+  mkdir $DISK/$NICK/{downloads,rtorrent}
+  echo "execute = {sh,-c,rm -f $DISK/$NICK/rtorrent/rpc.socket}
+  scgi_local = $DISK/$NICK/rtorrent/rpc.socket
+  execute = {sh,-c,chmod 0666 $DISK/$NICK/rtorrent/rpc.socket}
+  encoding_list = UTF-8
+  port_range = $PORT-$PORT
+  port_random = no
+  check_hash = no
+  directory = $DISK/$NICK/downloads
+  session = $DISK/$NICK/rtorrent
+  dht = disable
+  peer_exchange = no
+  execute = {sh,-c,/usr/bin/php /var/rutorrent/rutorrent/php/initplugins.php $NICK &}" > $DISK/$NICK/.rtorrent.rc
+  echo "scheduler.max_active.set = $PROCESS" >> $DISK/$NICK/.rtorrent.rc
+  ./htpasswd.py -b -c 1 $NICK $PASSWORDVALUE
+  chown -R $NICK:$NICK $DISK/$NICK/
+  if [ $OS = "debian" ] ; then
+          cat 1 >> /usr/local/lighttpd/rutorrent_passwd
+  elif [ $OS = "gentoo" ] ; then
+          cat 1 >> /etc/lighttpd/rutorrent_passwd
+  fi
+ ./startrt start $NICK > /dev/null
 }
 
-isRtorrent() {
-                mkdir /var/rutorrent/rutorrent/conf/users/$NICK
-                echo "<?php
-                \$scgi_port = 0;
-                \$scgi_host = \"unix://$DISK/$NICK/rtorrent/session/rpc.socket\";
-                \$XMLRPCMountPoint = \"$rtXMLRPC\";
-                ?>" > /var/rutorrent/rutorrent/conf/users/$NICK/config.php
-                mkdir $DISK/$NICK/downloads
-                mkdir $DISK/$NICK/rtorrent
-                mkdir $DISK/$NICK/rtorrent/session
-                echo "execute = {sh,-c,rm -f $DISK/$NICK/rtorrent/session/rpc.socket}
-                scgi_local = $DISK/$NICK/rtorrent/session/rpc.socket
-                execute = {sh,-c,chmod 0666 $DISK/$NICK/rtorrent/session/rpc.socket}
-                encoding_list = UTF-8
-                port_range = $rtP-$rtP
-                port_random = no
-                check_hash = no
-                directory = $DISK/$NICK/downloads
-                session = $DISK/$NICK/rtorrent/session
-                dht = disable
-                peer_exchange = no
-                execute = {sh,-c,/usr/bin/php /var/rutorrent/rutorrent/php/initplugins.php $NICK &}" > $DISK/$NICK/.rtorrent.rc
-                if [ $PROCESS != NULL ] ; then
-                        echo "scheduler.max_active.set = $PROCESS" >> $DISK/$NICK/.rtorrent.rc
-                fi
-                ./htpasswd.py -b -c 1 $NICK $PASSWORDVALUE
-                chown -R $NICK:$NICK $DISK/$NICK/
-                if [ $OS = "debian" ] ; then
-                        cat 1 >> /usr/local/lighttpd/rutorrent_passwd
-                elif [ $OS = "gentoo" ] ; then
-                        cat 1 >> /etc/lighttpd/rutorrent_passwd
-                fi
-                ./startrt start $NICK > /dev/null
+set_rapidleech() {
+  mkdir $DISK/$NICK/public_html
+  svn checkout http://rapidleech.googlecode.com/svn/trunk/ rapidleech-read-only
+  mv rapidleech-read-only $DISK/$NICK/public_html/rl
+  if [ $OS = "debian" ] ; then
+    cp /usr/bin/rar $DISK/$NICK/public_html/rl/rar/
+  elif [ $OS = "gentoo" ] ; then
+    cp /opt/rar/rar $DISK/$NICK/public_html/rl/rar/
+  fi
+  chmod +x $DISK/$NICK/public_html/rl/rar/*
+  chown -R $NICK:$NICK $DISK/$NICK/public_html
+  chmod -R 777 $DISK/$NICK/public_html/rl
 }
 
-isRapidleech() {
-                mkdir $DISK/$NICK/public_html
-                svn checkout http://rapidleech.googlecode.com/svn/trunk/ rapidleech-read-only
-                mv rapidleech-read-only $DISK/$NICK/public_html/rl
-                if [ $OS = "debian" ] ; then
-                        cp /usr/bin/rar $DISK/$NICK/public_html/rl/rar/
-                elif [ $OS = "gentoo" ] ; then
-                        cp /opt/rar/rar $DISK/$NICK/public_html/rl/rar/
-                fi
-                chmod +x $DISK/$NICK/public_html/rl/rar/*
-                chown -R $NICK:$NICK $DISK/$NICK/public_html
-                chmod -R 777 $DISK/$NICK/public_html/rl
+set_VNC() {
+  mkdir $DISK/$NICK/.vnc
+  cp .xscreensaver $DISK/$NICK/
+  cp xstartup $DISK/$NICK/.vnc
+  chmod +x $DISK/$NICK/.vnc/xstartup
+  chown -R $NICK:$NICK $DISK/$NICK/
+  echo $NICK >> vnclist
 }
 
-isVNC() {
-                mkdir $DISK/$NICK/.vnc
-                cp .xscreensaver $DISK/$NICK/
-                cp xstartup $DISK/$NICK/.vnc
-                chmod +x $DISK/$NICK/.vnc/xstartup
-                chown -R $NICK:$NICK $DISK/$NICK/
-                echo $NICK >> vnclist
+set_quota() {
+  quotatool -u $NICK -bl $((QUOTAVALUE*1024))M $MOUNTPOINT
 }
 
-isQuota() {
-                quotatool -u $NICK -bl $QUOTAVALUE $MOUNTPOINT
-}
-
-isPassword() {
-   passwd $NICK
+set_password() {
+  passwd $NICK
 }
 
 show() {
-        if [ $RTORRENT = "y" ] ; then
-                echo "webUI: http://$IP/rutorrent"
-        fi
-        if [ $RAPIDLEECH = "y" ] ; then
-                echo "Rapidleech: http://$IP/~$NICK/rl"
-        fi
-        if [ $VNC = "y" ] ; then
-            ./startvnc start $NICK
-        fi
-    echo "FTP: $IP"
-    echo "panel: http://woox.pl"
+  if [ $RTORRENT = "y" ] ; then
+    echo "webUI: http://$IP/rutorrent"
+  fi
+  if [ $RAPIDLEECH = "y" ] ; then
+    echo "Rapidleech: http://$IP/~$NICK/rl"
+  fi
+  if [ $VNC = "y" ] ; then
+    ./startvnc start $NICK
+  fi
+  echo "FTP: $IP"
+  echo "panel: http://woox.pl"
 }
 
 while [ $# -gt 0 ] ; do
-        arg="$1"
-        shift
-        if [ "$arg" = "-n" ] ; then
-                NICK="$1"
-                isNick
-                shift
-        elif [ "$arg" = "-p" ] ; then
-                PASSWORD=y
-                PASSWORDVALUE="$1"
-                isPassword
-                shift
-        elif [ "$arg" = "-r" ] ; then
-                RTORRENT=y
-                PROCESS="$1"
-                isRtorrent
-                shift
-        elif [ "$arg" = "-rl" ] ; then
-                RAPIDLEECH=y
-                isRapidleech
-        elif [ "$arg" = "-v" ] ; then
-                VNC=y
-                isVNC
-        elif [ "$arg" = "-q" ] ; then
-                QUOTA=y
-                QUOTAVALUE="$1"
-                isQuota
-                shift
-        elif [ "$arg" = "-d" ] ; then
-                DISK="$1"
-                shift
-        elif [ "$arg" = "-mp" ] ; then
-                MOUNTPOINT="$1"
-                shift
-        else
-                exitHelp
-        fi
+  arg="$1"
+  shift
+  if [ "$arg" = "-n" ] ; then
+    NICK="$1"
+    create_user
+    shift
+  elif [ "$arg" = "-p" ] ; then
+    PASSWORD=y
+    PASSWORDVALUE="$1"
+    set_password
+    shift
+  elif [ "$arg" = "-r" ] ; then
+    RTORRENT=y
+    PROCESS="$1"
+    set_rtorrent
+    shift
+  elif [ "$arg" = "-rl" ] ; then
+    RAPIDLEECH=y
+    set_rapidleech
+  elif [ "$arg" = "-v" ] ; then
+    VNC=y
+    set_VNC
+  elif [ "$arg" = "-q" ] ; then
+    QUOTA=y
+    QUOTAVALUE="$1"
+    set_quota
+    shift
+  elif [ "$arg" = "-d" ] ; then
+    DISK="$1"
+    shift
+  elif [ "$arg" = "-mp" ] ; then
+    MOUNTPOINT="$1"
+    shift
+  elif [ "$arg" = "--deluge" ] ; then
+    DELUGE=y
+    
+  else
+    echo "./add -n NICK -p PASSWORD [OPTIONS]"
+  fi
 done
 
 show
+ 
