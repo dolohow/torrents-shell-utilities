@@ -80,7 +80,7 @@ set_password() {
 show() {
   chown -R $NICK:$NICK $DISK/$NICK/
   if [ $RTORRENT = "y" ] ; then
-    chown root:root $NICK:$NICK $DISK/$NICK/.rtorrent.rc
+    chown root:root $DISK/$NICK/.rtorrent.rc
     chmod 644 $NICK:$NICK $DISK/$NICK/.rtorrent.rc
     echo "webUI: http://$IP/rutorrent"
      ./startrt start $NICK > /dev/null
