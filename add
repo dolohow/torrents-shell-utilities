@@ -81,9 +81,9 @@ show() {
   chown -R $NICK:$NICK $DISK/$NICK/
   if [ $RTORRENT = "y" ] ; then
     chown root:root $DISK/$NICK/.rtorrent.rc
-    chmod 644 $NICK:$NICK $DISK/$NICK/.rtorrent.rc
+    chmod 644 $DISK/$NICK/.rtorrent.rc
     echo "webUI: http://$IP/rutorrent"
-     ./startrt start $NICK > /dev/null
+    ./startrt start $NICK > /dev/null
   fi
   if [ $RAPIDLEECH = "y" ] ; then
     chmod +x $DISK/$NICK/public_html/rl/rar/*
@@ -142,4 +142,3 @@ while [ $# -gt 0 ] ; do
 done
 
 show
- 
