@@ -43,13 +43,12 @@ set_rtorrent() {
   execute = {sh,-c,/usr/bin/php /var/rutorrent/rutorrent/php/initplugins.php $NICK &}" > $DISK/$NICK/.rtorrent.rc
   echo "scheduler.max_active.set = $PROCESS" >> $DISK/$NICK/.rtorrent.rc
   ./htpasswd.py -b -c 1 $NICK $PASSWORDVALUE
-  chown -R $NICK:$NICK $DISK/$NICK/
   if [ $OS = "debian" ] ; then
           cat 1 >> /usr/local/lighttpd/rutorrent_passwd
   elif [ $OS = "gentoo" ] ; then
           cat 1 >> /etc/lighttpd/rutorrent_passwd
   fi
- ./startrt start $NICK > /dev/null
+ 
 }
 
 set_rapidleech() {
@@ -61,17 +60,12 @@ set_rapidleech() {
   elif [ $OS = "gentoo" ] ; then
     cp /opt/rar/rar $DISK/$NICK/public_html/rl/rar/
   fi
-  chmod +x $DISK/$NICK/public_html/rl/rar/*
-  chown -R $NICK:$NICK $DISK/$NICK/public_html
-  chmod -R 777 $DISK/$NICK/public_html/rl
 }
 
 set_VNC() {
   mkdir $DISK/$NICK/.vnc
   cp .xscreensaver $DISK/$NICK/
   cp xstartup $DISK/$NICK/.vnc
-  chmod +x $DISK/$NICK/.vnc/xstartup
-  chown -R $NICK:$NICK $DISK/$NICK/
   echo $NICK >> vnclist
 }
 
@@ -84,13 +78,21 @@ set_password() {
 }
 
 show() {
+  chown -R $NICK:$NICK $DISK/$NICK/
   if [ $RTORRENT = "y" ] ; then
+    chown root:root $NICK:$NICK $DISK/$NICK/.rtorrent.rc
+    chmod 644 $NICK:$NICK $DISK/$NICK/.rtorrent.rc
     echo "webUI: http://$IP/rutorrent"
+     ./startrt start $NICK > /dev/null
   fi
   if [ $RAPIDLEECH = "y" ] ; then
+    chmod +x $DISK/$NICK/public_html/rl/rar/*
+    chown -R $NICK:$NICK $DISK/$NICK/public_html
+    chmod -R 777 $DISK/$NICK/public_html/rl
     echo "Rapidleech: http://$IP/~$NICK/rl"
   fi
   if [ $VNC = "y" ] ; then
+    chmod +x $DISK/$NICK/.vnc/xstartup
     ./startvnc start $NICK
   fi
   echo "FTP: $IP"
