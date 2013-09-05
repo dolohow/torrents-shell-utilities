@@ -1,0 +1,4 @@
+#!/bin/bash
+
+echo -e "" >> ~/transfer_backup
+iptables -L OUTPUT -v | tail -n+2 | awk 'NR % 2 == 0' | awk '{print $2 " " $13}' >> ~/transfer_backup
