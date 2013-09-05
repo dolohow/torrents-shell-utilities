@@ -37,7 +37,7 @@ rm -rf /var/run/screen/$USER
 
 if [ $HAVEVNC != '0' ] ; then
 	sed /$USER/d vnclist > tmp
-	cat tmp > vnclits
+	cat tmp > vnclist
     rm tmp
 fi
 
