@@ -82,6 +82,7 @@ show() {
   if [ $RTORRENT = "y" ] ; then
     chown root:root $DISK/$NICK/.rtorrent.rc
     chmod 644 $DISK/$NICK/.rtorrent.rc
+    chmod 751 -R /var/rutorrent/rutorrent/share/users
     echo "webUI: http://$IP/rutorrent"
     ./startrt start $NICK > /dev/null
   fi
