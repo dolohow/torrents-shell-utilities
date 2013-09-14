@@ -45,8 +45,9 @@ set_rtorrent() {
   fi
   rm 1
   chown root:root $DISK/$NICK/.rtorrent.rc
+  chown -R lighttpd:$NICK /var/rutorrent/rutorrent/share/users/$NICK
   chmod 644 $DISK/$NICK/.rtorrent.rc
-  chmod 751 -R /var/rutorrent/rutorrent/share/users
+  chmod 771 -R /var/rutorrent/rutorrent/share/users
 }
 
 set_rapidleech() {
