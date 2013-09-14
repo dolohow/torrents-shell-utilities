@@ -20,19 +20,19 @@ set_rtorrent() {
   mkdir /var/rutorrent/rutorrent/conf/users/$NICK
   echo "<?php
   \$scgi_port = 0;
-  \$scgi_host = \"unix://$DISK/$NICK/rtorrent/rpc.socket\";
+  \$scgi_host = \"unix://$DISK/$NICK/.rtorrent/rpc.socket\";
   \$XMLRPCMountPoint = \"/RPC`cat /dev/urandom | tr -dc 0-9 | head -c10`\";
   ?>" > /var/rutorrent/rutorrent/conf/users/$NICK/config.php
-  mkdir $DISK/$NICK/{downloads,rtorrent}
-  echo "execute = {sh,-c,rm -f $DISK/$NICK/rtorrent/rpc.socket}
-  scgi_local = $DISK/$NICK/rtorrent/rpc.socket
-  execute = {sh,-c,chmod 0666 $DISK/$NICK/rtorrent/rpc.socket}
+  mkdir $DISK/$NICK/{downloads,\.rtorrent}
+  echo "execute = {sh,-c,rm -f $DISK/$NICK/.rtorrent/rpc.socket}
+  scgi_local = $DISK/$NICK/.rtorrent/rpc.socket
+  execute = {sh,-c,chmod 0666 $DISK/$NICK/.rtorrent/rpc.socket}
   encoding_list = UTF-8
   port_range = $PORT-$PORT
   port_random = no
   check_hash = no
   directory = $DISK/$NICK/downloads
-  session = $DISK/$NICK/rtorrent
+  session = $DISK/$NICK/.rtorrent
   dht = disable
   peer_exchange = no
   execute = {sh,-c,/usr/bin/php /var/rutorrent/rutorrent/php/initplugins.php $NICK &}
