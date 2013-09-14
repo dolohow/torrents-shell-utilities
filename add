@@ -13,6 +13,7 @@ fi
 create_user() {
   mkdir $DISK/$NICK
   useradd -d $DISK/$NICK $NICK
+  chown -R $NICK:$NICK $DISK/$NICK/
 }
 
 set_rtorrent() {
@@ -45,8 +46,9 @@ set_rtorrent() {
   fi
   rm 1
   chown root:root $DISK/$NICK/.rtorrent.rc
-  chown -R lighttpd:$NICK /var/rutorrent/rutorrent/share/users/$NICK
   chmod 644 $DISK/$NICK/.rtorrent.rc
+  ./startrt start $NICK > /dev/null
+  chown -R lighttpd:$NICK /var/rutorrent/rutorrent/share/users/$NICK
   chmod 771 -R /var/rutorrent/rutorrent/share/users
 }
 
@@ -82,16 +84,15 @@ set_password() {
 
 set_transfer_limit() {
   # zaokraglanie limitu
-  iptables -A OUTPUT -p tcp -m owner --uid-owner $NICK -m quota --quota $(($TRANSFERLIMITVALUE*1024*1024*1024*1024)) -j ACCEPT
+  VALUE=`echo $(($TRANSFERLIMITVALUE*1024*1024*1024*1024)) | awk -F'.' '{print $1}'`
+  iptables -A OUTPUT -p tcp -m owner --uid-owner $NICK -m quota --quota $VALUE -j ACCEPT
   iptables -A OUTPUT -p tcp -m owner --uid-owner $NICK -j DROP
   iptables-save > iptables
 }
 
 final() {
-  chown -R $NICK:$NICK $DISK/$NICK/
   if [ $RTORRENT ] ; then
     echo "webUI: http://$IP/rutorrent"
-    ./startrt start $NICK > /dev/null
   fi
   if [ $RAPIDLEECH ] ; then
     echo "Rapidleech: http://$IP/~$NICK/rl"
