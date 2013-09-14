@@ -1,0 +1,3 @@
+#!/usr/bin/bash
+
+iptables -A OUTPUT -p tcp -m owner --uid-owner $1 -j DROP
