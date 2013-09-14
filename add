@@ -38,12 +38,12 @@ set_rtorrent() {
   execute = {sh,-c,/usr/bin/php /var/rutorrent/rutorrent/php/initplugins.php $NICK &}
   scheduler.max_active.set = $PROCESS" > $DISK/$NICK/.rtorrent.rc
   ./htpasswd.py -b -c 1 $NICK $PASSWORDVALUE
-  rm 1
   if [ $OS = "debian" ] ; then
           cat 1 >> /usr/local/lighttpd/rutorrent_passwd
   elif [ $OS = "gentoo" ] ; then
           cat 1 >> /etc/lighttpd/rutorrent_passwd
   fi
+  rm 1
   chown root:root $DISK/$NICK/.rtorrent.rc
   chmod 644 $DISK/$NICK/.rtorrent.rc
   chmod 751 -R /var/rutorrent/rutorrent/share/users
@@ -80,6 +80,7 @@ set_password() {
 }
 
 set_transfer_limit() {
+  # zaokraglanie limitu
   iptables -A OUTPUT -p tcp -m owner --uid-owner $NICK -m quota --quota $(($TRANSFERLIMITVALUE*1024*1024*1024*1024)) -j ACCEPT
   iptables -A OUTPUT -p tcp -m owner --uid-owner $NICK -j DROP
   iptables-save > iptables
@@ -138,6 +139,7 @@ while [ $# -gt 0 ] ; do
   elif [ "$arg" = "-t" ] ; then
     TRANSFERLIMITVALUE="$1"
     set_transfer_limit
+    shift
   else
     echo "./add -n NICK -p PASSWORD [OPTIONS]"
   fi
