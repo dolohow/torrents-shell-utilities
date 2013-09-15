@@ -41,10 +41,10 @@ startRt() {
 					echo "$USER - rtorrent został prawidłowo uruchomiony"
 				else
 					echo "$USER - Usuwam wszystkie załadowane torrenty"
-					rm -rf /home*/$USER/.rtorrent/*
+					rm -f /home*/$USER/.rtorrent/*
 					# Legacy
-					rm -rf /home*/$USER/rtorrent/session/*
-					rm -rf /home*/$USER/rtorrent/*
+					rm -f /home*/$USER/rtorrent/session/*
+					rm -f /home*/$USER/rtorrent/*
 					su $USER -c "screen -dmS rtorrent rtorrent"
 					echo "$USER - czekam 5 sekund na potwierdzenie działania rtorrenta"
 					sleep 5s
