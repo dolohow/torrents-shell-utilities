@@ -47,9 +47,10 @@ set_rtorrent() {
   rm 1
   chown root:root $DISK/$NICK/.rtorrent.rc
   chmod 644 $DISK/$NICK/.rtorrent.rc
+  chown -R $NICK:$NICK $DISK/$NICK/{downloads,\.rtorrent}
   ./startrt start $NICK > /dev/null
   chown -R lighttpd:$NICK /var/rutorrent/rutorrent/share/users/$NICK
-  chmod 771 -R /var/rutorrent/rutorrent/share/users
+  chmod -R 771 /var/rutorrent/rutorrent/share/users
 }
 
 set_rapidleech() {
@@ -70,6 +71,7 @@ set_VNC() {
   mkdir $DISK/$NICK/.vnc
   cp .xscreensaver $DISK/$NICK/
   cp xstartup $DISK/$NICK/.vnc
+  chown -R $NICK:$NICK $DISK/$NICK/.vnc
   chmod +x $DISK/$NICK/.vnc/xstartup
   echo $NICK >> vnclist
 }
