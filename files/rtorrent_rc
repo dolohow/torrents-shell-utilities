@@ -1,0 +1,12 @@
+execute = {{sh,-c,rm -f {homedir}/.rtorrent/rpc.socket}}
+scgi_local = {homedir}/.rtorrent/rpc.socket
+execute = {{sh,-c,chmod 0666 {homedir}/.rtorrent/rpc.socket}}
+encoding_list = UTF-8
+port_range = {port}-{port}
+port_random = no
+check_hash = no
+directory = {homedir}/downloads
+session = {homedir}/.rtorrent
+dht = disable
+peer_exchange = no
+execute = {{sh,-c,/usr/bin/php /var/rutorrent/rutorrent/php/initplugins.php {username} &}}
