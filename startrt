@@ -13,7 +13,7 @@ checkUser() {
 		exit
 	fi
 	ISSTARTED=`pgrep -u $USER rtorrent | wc -l`
-	DISKQUOTA=`repquota -u -s /home | grep $USER | awk '{print $2'}`
+	DISKQUOTA=`repquota -u -s -a | grep $USER | awk '{print $2'}`
 }
 
 startRt() {
