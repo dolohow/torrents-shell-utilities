@@ -17,7 +17,7 @@ checkUser() {
 }
 
 startRt() {
-	for ((c=0; c<4; c++)) ; do
+	for ((c=0; c<3; c++)) ; do
 		checkUser
 		if [ $ISSTARTED != '0' ] ; then
 			echo "$USER - rtorrent jest uruchomiony"

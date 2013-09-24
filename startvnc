@@ -19,6 +19,7 @@ checkUser() {
 }
 
 startVNC() {
+	checkUser
 	if [ $ISSTARTED != '0' ] ; then
 		echo "$USER - vnc jest już uruchomione"
 	elif [ $DISKQUOTA = '+-' ] ; then
