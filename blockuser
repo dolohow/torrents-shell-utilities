@@ -2,3 +2,4 @@
 
 iptables -A OUTPUT -p tcp -m owner --uid-owner $1 -j DROP
 echo "User $1 został zablokowany"
+iptables-save > /etc/iptables
