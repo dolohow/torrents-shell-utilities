@@ -4,59 +4,56 @@ ACTION=$1
 USER=$2
 
 checkUser() {
+	if [ ! -e exclude ] ; then
+		touch exclude
+	fi
 	EXIST=`ls /var/rutorrent/rutorrent/conf/users | grep -w $USER | wc -l`
 	if [ $EXIST = '0' ] ; then
 		echo "$USER - nie posiada rtorrenta"
 		exit
 	fi
 	ISSTARTED=`pgrep -u $USER rtorrent | wc -l`
+	DISKQUOTA=`repquota -u -s /home | grep $USER | awk '{print $2'}`
 }
 
 startRt() {
-	checkUser
-	if [ $ISSTARTED != '0' ] ; then
-		echo "$USER - rtorrent jest już uruchomiony"
-	else
-		su $USER -c "screen -dmS rtorrent rtorrent"
-		echo "$USER - czekam 5 sekund na potwierdzenie działania rtorrenta"
-		sleep 5s
+	for ((c=0; c<4; c++)) ; do
+		checkUser
+		if [ $ISSTARTED != '0' ] ; then
+			echo "$USER - rtorrent jest uruchomiony"
+			break
+		elif [ $c = '0' ] && [ $DISKQUOTA = '+-' ] ; then
+			echo "$USER - przekroczone miejsce na dysku"
+			break
+		elif [ $c = '0' ] ; then
+			su $USER -c "screen -dmS rtorrent rtorrent"
+			echo "$USER - czekam 5 sekund na potwierdzenie działania rtorrenta"
+			sleep 5s
+		elif [ $c = '1' ] ; then
+			echo "$USER - kasuje pliki rtorrenta i sesji screen"
+			rm -f /home*/$USER/.rtorrent/rpc.socket
+			rm -f /home*/$USER/.rtorrent/rtorrent.lock
+			# Legacy
+			rm -f /home*/$USER/rtorrent/rpc.socket
+			rm -f /home*/$USER/rtorrent/rtorrent.lock
+			rm -f /home*/$USER/rtorrent/session/rpc.socket
+			rm -f /home*/$USER/rtorrent/session/rtorrent.lock
+			rm -fr /var/run/screen/S-$USER
+			su $USER -c "screen -dmS rtorrent rtorrent"
+			echo "$USER - czekam 5 sekund na potwierdzenie działania rtorrenta"
+			sleep 5s
+		elif [ $c = '2' ] ; then
+			echo "$USER - Usuwam wszystkie załadowane torrenty"
+			rm -f /home*/$USER/.rtorrent/*
+			# Legacy
+			rm -f /home*/$USER/rtorrent/session/*
+			rm -f /home*/$USER/rtorrent/*
+			su $USER -c "screen -dmS rtorrent rtorrent"
+			echo "$USER - czekam 5 sekund na potwierdzenie działania rtorrenta"
+			sleep 5s
 			checkUser
-			if [ $ISSTARTED != '0' ] ; then
-				echo "$USER - rtorrent został prawidłowo uruchomiony"
-			else
-				echo "$USER - kasuje pliki rtorrenta i sesji screen"
-				rm -f /home*/$USER/.rtorrent/rpc.socket
-				rm -f /home*/$USER/.rtorrent/rtorrent.lock
-				# Legacy
-				rm -f /home*/$USER/rtorrent/rpc.socket
-				rm -f /home*/$USER/rtorrent/rtorrent.lock
-				rm -f /home*/$USER/rtorrent/session/rpc.socket
-				rm -f /home*/$USER/rtorrent/session/rtorrent.lock
-				rm -fr /var/run/screen/S-$USER
-				su $USER -c "screen -dmS rtorrent rtorrent"
-				echo "$USER - czekam 5 sekund na potwierdzenie działania rtorrenta"
-				sleep 5s
-				checkUser
-				if [ $ISSTARTED != '0' ] ; then
-					echo "$USER - rtorrent został prawidłowo uruchomiony"
-				else
-					echo "$USER - Usuwam wszystkie załadowane torrenty"
-					rm -f /home*/$USER/.rtorrent/*
-					# Legacy
-					rm -f /home*/$USER/rtorrent/session/*
-					rm -f /home*/$USER/rtorrent/*
-					su $USER -c "screen -dmS rtorrent rtorrent"
-					echo "$USER - czekam 5 sekund na potwierdzenie działania rtorrenta"
-					sleep 5s
-					checkUser
-					if [ $ISSTARTED != '0' ] ; then
-						echo "$USER - rtorrent został prawidłowo uruchomiony"
-					else
-						echo "$USER - rtorrent wciąż nie działa muszę się przyjrzeć temu problemowi"
-					fi
-				fi
-			fi
-	fi
+		fi
+	done
 }
 
 stopRt() {
@@ -85,9 +82,6 @@ statusRt() {
 }
 
 if [ $USER = "all" ] ; then
-	if [ ! -e exclude ] ; then
-		touch exclude
-	fi
 	if [ $ACTION = "start" ] ; then
 		for rtUsers in /var/rutorrent/rutorrent/conf/users/* ; do
 			rtUsers=`echo $rtUsers | sed -e 's/\/var\/rutorrent\/rutorrent\/conf\/users\///g'`
