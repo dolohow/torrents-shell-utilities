@@ -49,9 +49,9 @@ set_rtorrent() {
   chmod 644 $DISK/$NICK/.rtorrent.rc
   chown -R $NICK:$NICK $DISK/$NICK/{downloads,\.rtorrent}
   ./startrt start $NICK > /dev/null
-  mkdir /var/rutorrent/rutorrent/share/users/$NICK
+  mkdir -p /var/rutorrent/rutorrent/share/users/$NICK/{settings,torrents}
   chown -R lighttpd:$NICK /var/rutorrent/rutorrent/share/users/$NICK
-  chmod -R 771 /var/rutorrent/rutorrent/share/users
+  chmod -R 771 /var/rutorrent/rutorrent/share/users/$NICK
 }
 
 set_rapidleech() {
