@@ -8,7 +8,7 @@ checkUser() {
 	ISSTARTED=`pgrep -u $USER vnc | wc -l`
 	HAVEVNC=`cat vnclist | grep -x $USER | wc -l`
 	IP=`ifconfig  | egrep -o "([0-9]{1,3}\.){3}[0-9]{1,3}" | head -n1`
-	DISKQUOTA=`repquota -u -s -a | grep $USER | awk '{print $2'}`
+	DISKQUOTA=`repquota -u -s -a | grep $USER | awk '{print $2'} | tail -n1`
 	if [ ! -e vnclist ] ; then
 		touch vnclist
 	fi
