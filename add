@@ -4,12 +4,6 @@ IP=`ifconfig  | egrep -o "([0-9]{1,3}\.){3}[0-9]{1,3}" | head -n1`
 DISK="/home"
 MOUNTPOINT="/home"
 
-if [ -f "/etc/gentoo-release" ] ; then
-  OS=gentoo
-elif [ -f "/etc/debian_version" ] ; then
-  OS=debian
-fi
-
 create_user() {
   mkdir $DISK/$NICK
   useradd -d $DISK/$NICK $NICK
@@ -39,30 +33,19 @@ set_rtorrent() {
   execute = {sh,-c,/usr/bin/php /var/rutorrent/rutorrent/php/initplugins.php $NICK &}
   scheduler.max_active.set = $PROCESS" > $DISK/$NICK/.rtorrent.rc
   ./htpasswd.py -b -c 1 $NICK $PASSWORDVALUE
-  if [ $OS = "debian" ] ; then
-          cat 1 >> /usr/local/lighttpd/rutorrent_passwd
-  elif [ $OS = "gentoo" ] ; then
-          cat 1 >> /etc/lighttpd/rutorrent_passwd
-  fi
+  cat 1 >> /usr/local/lighttpd/rutorrent_passwd
   rm 1
   chown root:root $DISK/$NICK/.rtorrent.rc
   chmod 644 $DISK/$NICK/.rtorrent.rc
   chown -R $NICK:$NICK $DISK/$NICK/{downloads,\.rtorrent}
   ./startrt start $NICK > /dev/null
-  mkdir -p /var/rutorrent/rutorrent/share/users/$NICK/{settings,torrents}
-  chown -R lighttpd:$NICK /var/rutorrent/rutorrent/share/users/$NICK
-  chmod -R 771 /var/rutorrent/rutorrent/share/users/$NICK
 }
 
 set_rapidleech() {
   mkdir $DISK/$NICK/public_html
   svn checkout http://rapidleech.googlecode.com/svn/trunk/ rapidleech-read-only
   mv rapidleech-read-only $DISK/$NICK/public_html/rl
-  if [ $OS = "debian" ] ; then
-    cp /usr/bin/rar $DISK/$NICK/public_html/rl/rar/
-  elif [ $OS = "gentoo" ] ; then
-    cp /opt/rar/rar $DISK/$NICK/public_html/rl/rar/
-  fi
+  cp /usr/bin/rar $DISK/$NICK/public_html/rl/rar/
   chmod +x $DISK/$NICK/public_html/rl/rar/*
   chown -R $NICK:$NICK $DISK/$NICK/public_html
   chmod -R 777 $DISK/$NICK/public_html/rl
