@@ -5,3 +5,4 @@ cat /etc/iptables | grep -v $USERID > /tmp/iptables
 iptables-restore < /tmp/iptables
 rm /tmp/iptables
 echo "$USER - został odblokowany"
+iptables-save > /etc/iptables
