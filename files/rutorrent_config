@@ -1,5 +1,0 @@
-<?php
-	$scgi_port = 0;
-	$scgi_host = "unix://{homedir}/.rtorrent/rpc.socket";
-	$XMLRPCMountPoint = "/RPC{xmlrpc}";
-?>
