@@ -8,14 +8,9 @@ createArchive() {
 	mkdir /root/archiwum/$USER
 	updatedb
 	locate $USER > /root/archiwum/$USER/$USER.torrents
-	if [ -f "/etc/gentoo-release" ] ; then
-		cat /var/log/lighttpd/access.log | grep $USER | egrep -o '([0-9]{1,3}\.){3}[0-9]{1,3}' | sort -u > /root/archiwum/$USER/$USER.ip
-		zcat /var/log/lighttpd/*gz | grep $USER | egrep -o '([0-9]{1,3}\.){3}[0-9]{1,3}' | sort -u >> /root/archiwum/$USER/$USER.ip
-	elif [ -f "/etc/debian_version" ] ; then
-		cat /usr/local/lighttpd/logs/access.log | grep $USER | egrep -o '([0-9]{1,3}\.){3}[0-9]{1,3}' | sort -u >> /root/archiwum/$USER/$USER.ip
-		cat /usr/local/lighttpd/logs/access.log.1 | grep $USER | egrep -o '([0-9]{1,3}\.){3}[0-9]{1,3}' | sort -u >> /root/archiwum/$USER/$USER.ip
-		zcat /usr/local/lighttpd/logs/*gz | grep $USER | egrep -o '([0-9]{1,3}\.){3}[0-9]{1,3}' | sort -u >> /root/archiwum/$USER/$USER.ip
-	fi
+	cat /usr/local/lighttpd/logs/access.log | grep $USER | egrep -o '([0-9]{1,3}\.){3}[0-9]{1,3}' | sort -u >> /root/archiwum/$USER/$USER.ip
+	cat /usr/local/lighttpd/logs/access.log.1 | grep $USER | egrep -o '([0-9]{1,3}\.){3}[0-9]{1,3}' | sort -u >> /root/archiwum/$USER/$USER.ip
+	zcat /usr/local/lighttpd/logs/*gz | grep $USER | egrep -o '([0-9]{1,3}\.){3}[0-9]{1,3}' | sort -u >> /root/archiwum/$USER/$USER.ip
 	cat /root/archiwum/$USER/$USER.ip | sort -u > /root/archiwum/$USER.ip-new
 	mv /root/archiwum/$USER.ip-new /root/archiwum/$USER/$USER.ip
 }
