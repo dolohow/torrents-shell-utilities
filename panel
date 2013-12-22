@@ -1,27 +1,23 @@
 #!/bin/bash
-#Napisane przez reyder
 
+load=`cat /proc/loadavg | tr " " "_"`
+hostname=`hostname`
+# Zmienna przechowująca dane do wyslania skryptowi PHP
+array=""
 
-
-load=`cat /proc/loadavg | tr " " "_"`	### Zmienna przechowujaca obciazenie serwera
-hostname=`hostname`						### Zmienna przechowująca adres serwera
-array=""								### Zmienna przechowujące dane do wyslania skryptowi PHP
-
-#### Zmienne do obliczania wykorzystania lacza serwera ####
+# Zmienne do obliczania wykorzystania lacza serwera
 interface=$1
 received_bytes=""
 old_received_bytes=""
 transmitted_bytes=""
 old_transmitted_bytes=""
 
-
-action=`sh /root/startrt status all`	### Zmienna przechowujaca stan rtorrentow
+action=`sh /root/startrt status all`
 
 SAVEIFS=$IFS
 IFS=$(echo -en "\n\b")
 
 for rtUsers in $action ; do
-
 	if [ ${rtUsers:1:1} = "1" ]
 		then ttt="${rtUsers:4}=1"
 	elif [ ${rtUsers:1:1} = "0" ]
@@ -29,20 +25,19 @@ for rtUsers in $action ; do
 	else
 		ttt="${rtUsers:4}=0"
 	fi
-
 	array=''$array'&'$ttt''
-
 done
 
 IFS=$SAVEIFS
 
-	hdd_file=`du -h --max-depth=1 /home | awk -F/home/ '{print $2 ";" $1}' | grep -v /home| grep -v ftp | grep -v lost+found | tr "\t\t\n \v" "_____"`
+hdd_file=`du -h --max-depth=1 /home | awk -F/home/ '{print $2 ";" $1}' | grep -v /home| grep -v ftp | grep -v lost+found | tr "\t\t\n \v" "_____"`
 if [ -d /home2 ]; then
-	hdd_file2=`du -h --max-depth=1 /home2 | awk -F/home2/ '{print $2 ";" $1}' | grep -v /home2 | grep -v ftp | grep -v lost+found | tr "\t\t\n \v" "_____"`
+  hdd_file2=`du -h --max-depth=1 /home2 | awk -F/home2/ '{print $2 ";" $1}' | grep -v /home2 | grep -v ftp | grep -v lost+found | tr "\t\t\n \v" "_____"`
 fi
 
 hdd=`echo "${hdd_file}$hdd_file2"`
 
+transfer=`iptables -L OUTPUT -v | tail -n+2 | awk 'NR % 2 == 0' | awk '{print $13 ";" $2}' | tr "\t\t\n \v" "__"`
 
 # This function parses /proc/net/dev file searching for a line containing $interface data.
 # Within that line, the first and ninth numbers after ':' are respectively the received and transmited bytes.
@@ -86,4 +81,5 @@ vel_trans=$(get_velocity $transmitted_bytes $old_transmitted_bytes)
 
 /usr/bin/wget -q -O - 'http://woox.pl/woox.php?info2=1&upload='$vel_trans'&download='$vel_recv'&host='$hostname'' >/dev/null 2>&1
 /usr/bin/wget -q -O - 'http://woox.pl/woox.php?info=1&load='$load'&dysk='$hdd'&host='$hostname'' >/dev/null 2>&1
-/usr/bin/wget -q -O - 'http://woox.pl/woox.php?uzytkownicy=1'$array'' >/dev/null 2>&1        
+/usr/bin/wget -q -O - 'http://woox.pl/woox.php?uzytkownicy=1'$array'' >/dev/null 2>&1 
+/usr/bin/wget -q -O - 'http://woox.pl/woox.php?info3=1&transfer='$transfer'' >/dev/null 2>&1 
