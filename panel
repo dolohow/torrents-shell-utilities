@@ -39,7 +39,7 @@ hdd=`echo "${hdd_file}$hdd_file2"`
 
 transfer1=`iptables -L OUTPUT -v | grep ACCEPT | awk '{print $13 "_" $2}' | tail -n +2 | tr "\n" ";"`
 transfer2=`iptables -t mangle -L POSTROUTING -v | grep ACCEPT | awk '{print $13 "_" $2}' | tail -n +2 | tr "\n" ";"`
-transfer=`echo ${tramsfer1}${transfer2}`
+transfer=`echo ${transfer1}${transfer2}`
 
 # This function parses /proc/net/dev file searching for a line containing $interface data.
 # Within that line, the first and ninth numbers after ':' are respectively the received and transmited bytes.
