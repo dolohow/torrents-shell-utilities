@@ -53,7 +53,7 @@ set_rapidleech() {
 
 set_VNC() {
   mkdir $DISK/$NICK/.vnc
-  cp .xscreensaver $DISK/$NICK/
+  cp vnc_files/.xscreensaver $DISK/$NICK/
   cp vnc_files/xstartup $DISK/$NICK/.vnc
   chown -R $NICK:$NICK $DISK/$NICK/.vnc
   mkdir $DISK/$NICK/Desktop
