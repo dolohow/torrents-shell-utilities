@@ -54,8 +54,11 @@ set_rapidleech() {
 set_VNC() {
   mkdir $DISK/$NICK/.vnc
   cp .xscreensaver $DISK/$NICK/
-  cp xstartup $DISK/$NICK/.vnc
+  cp vnc_files/xstartup $DISK/$NICK/.vnc
   chown -R $NICK:$NICK $DISK/$NICK/.vnc
+  mkdir $DISK/$NICK/Desktop
+  cp vnc_files/[^x]* $DISK/$NICK/Desktop
+  chown $NICK:$NICK $DISK/$NICK/Desktop/*
   chmod +x $DISK/$NICK/.vnc/xstartup
   echo $NICK >> vnclist
 }
@@ -71,9 +74,9 @@ set_password() {
 set_transfer_limit() {
   # zaokraglanie limitu
   VALUE=`echo $(($TRANSFERLIMITVALUE*1024*1024*1024*1024)) | awk -F'.' '{print $1}'`
-  iptables -A OUTPUT -p tcp -m owner --uid-owner $NICK -m quota --quota $VALUE -j ACCEPT
-  iptables -A OUTPUT -p tcp -m owner --uid-owner $NICK -j DROP
-  iptables-save > iptables
+  iptables -t mangle -A POSTROUTING -o eth0 -p tcp -m owner --uid-owner $NICK -m quota --quota $VALUE -j ACCEPT
+  iptables -t mangle -A POSTROUTING -o eth0 -p tcp -m owner --uid-owner john -j CLASSIFY --set-class 1:11
+  iptables-save > /etc/iptables
 }
 
 final() {
