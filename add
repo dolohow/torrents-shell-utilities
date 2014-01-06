@@ -73,9 +73,10 @@ set_password() {
 
 set_transfer_limit() {
   # zaokraglanie limitu
-  VALUE=`echo $(($TRANSFERLIMITVALUE*1024*1024*1024*1024)) | awk -F'.' '{print $1}'`
+  VALUE=`echo $(($TRANSFERLIMITVALUE*1024*1024*1024)) | awk -F'.' '{print $1}'`
+  LAST=`iptables -t mangle -L POSTROUTING -v | tail -n1 | grep -o 1\:.* | awk -F: '{print $2}'`
   iptables -t mangle -A POSTROUTING -o eth0 -p tcp -m owner --uid-owner $NICK -m quota --quota $VALUE -j ACCEPT
-  iptables -t mangle -A POSTROUTING -o eth0 -p tcp -m owner --uid-owner john -j CLASSIFY --set-class 1:11
+  iptables -t mangle -A POSTROUTING -o eth0 -p tcp -m owner --uid-owner $NICK -j CLASSIFY --set-class 1:$LAST
   iptables-save > /etc/iptables
 }
 

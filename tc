@@ -1,0 +1,7 @@
+#!/bin/bash
+read a b
+for ((a; a<b; a++)) ; do
+        tc class add dev eth0 parent 1:1 classid 1:$((a+10)) htb rate 10Mbit ceil 10Mbit prio 2
+        tc qdisc add dev eth0 parent 1:$((a+10)) handle $((a*10)): sfq perturb 10
+done
+
