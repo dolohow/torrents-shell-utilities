@@ -41,6 +41,9 @@ set_rtorrent() {
   ./startrt start $NICK > /dev/null
 }
 
+set_deluge() {
+}
+
 set_rapidleech() {
   mkdir $DISK/$NICK/public_html
   svn checkout http://rapidleech.googlecode.com/svn/trunk/ rapidleech-read-only
@@ -59,6 +62,7 @@ set_VNC() {
   mkdir $DISK/$NICK/Desktop
   cp vnc_files/[^x]* $DISK/$NICK/Desktop
   chown $NICK:$NICK $DISK/$NICK/Desktop/*
+  chmod +x $DISK/$NICK/Desktop/*
   chmod +x $DISK/$NICK/.vnc/xstartup
   echo $NICK >> vnclist
 }
@@ -128,6 +132,7 @@ while [ $# -gt 0 ] ; do
     shift
   elif [ "$arg" = "--deluge" ] ; then
     DELUGE=y
+    set_deluge
   elif [ "$arg" = "-t" ] ; then
     TRANSFERLIMITVALUE="$1"
     set_transfer_limit

@@ -1,5 +1,4 @@
 #!/bin/bash
 
 echo -e "" >> ~/transfer_backup
-iptables -L OUTPUT -v | grep ACCEPT | awk '{print $2 " " $13}' | tail -n +2 >> ~/transfer_backup
 iptables -t mangle -L POSTROUTING -v | grep ACCEPT | awk '{print $2 " " $13}' | tail -n +2 >> ~/transfer_backup
