@@ -1,4 +1,5 @@
-#/bin/bash
+#!/bin/bash
+
 line_number=`iptables -t mangle -L POSTROUTING -v --line-numbers | grep ACCEPT | grep $1 | awk '{print $1}'`
 iptables -t mangle -D POSTROUTING $line_number
-iptables -t mangle -I POSTROUTING $line_number -o eth0 -p tcp -m owner --uid-owner $1 -m quota --quota $2 -j ACCEPT
+iptables -t mangle -I POSTROUTING $line_number -o eth0 -p tcp -m owner --uid-owner $1 -m quota --quota $(($2*1024*1024*1024)) -j ACCEPT

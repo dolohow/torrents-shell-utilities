@@ -1,11 +1,5 @@
 #!/bin/bash
 
-USER=$1
-USERID=`cat /etc/passwd | grep $USER | awk -F: '{print $3}'`
-iptables-save | grep OUTPUT > /tmp/iptables
-del=`awk '{printf "%d;%s\n", NR, $0}' < /tmp/iptables | grep $USERID | awk -F ';' '{print $1}'`
-for i in $del ; do
-  iptables -D OUTPUT $i
-done
-rm /tmp/iptables
-echo "$USER - został odblokowany"
+line_number=`iptables -L OUTPUT --line-numbers | grep $1 | awk '{print $1}'`
+iptables -D OUTPUT $line_number
+echo "User $1 został odblokowany"
