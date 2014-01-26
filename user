@@ -3,21 +3,33 @@
 ACTION=$1
 PARAM=$2
 
+HAVEVNC=`cat vnclist | grep -x $PARAM | wc -l`
+HAVERT=`ls /var/rutorrent/rutorrent/conf/users | grep -w $PARAM | wc -l`
+RUTORRENT_PASSWD='/usr/local/lighttpd/rutorrent_passwd'
+
+createArchive() {
+    mkdir /root/archiwum/$PARAM
+    updatedb
+    locate $PARAM > /root/archiwum/$PARAM/$PARAM.torrents
+    cat /usr/local/lighttpd/logs/access.log | grep $PARAM | egrep -o '([0-9]{1,3}\.){3}[0-9]{1,3}' | sort -u >> /root/archiwum/$PARAM/$PARAM.ip
+    cat /usr/local/lighttpd/logs/access.log.1 | grep $PARAM | egrep -o '([0-9]{1,3}\.){3}[0-9]{1,3}' | sort -u >> /root/archiwum/$PARAM/$PARAM.ip
+    zcat /usr/local/lighttpd/logs/*gz | grep $PARAM | egrep -o '([0-9]{1,3}\.){3}[0-9]{1,3}' | sort -u >> /root/archiwum/$PARAM/$PARAM.ip
+    cat /root/archiwum/$PARAM/$PARAM.ip | sort -u > /root/archiwum/$PARAM.ip-new
+    mv /root/archiwum/$PARAM.ip-new /root/archiwum/$PARAM/$PARAM.ip
+}
+
 if [ $ACTION = "block" ] ; then
-    iptables -A OUTPUT -p tcp -m owner --uid-owner $2 -j DROP
-    echo "User $2 został zablokowany"
+    iptables -A OUTPUT -p tcp -m owner --uid-owner $PARAM -j DROP
+    echo "User $PARAM został zablokowany"
 elif [ $ACTION = "unblock" ] ; then
-    line_number=`iptables -L OUTPUT --line-numbers | grep $2 | awk '{print $1}'`
+    line_number=`iptables -L OUTPUT --line-numbers | grep $PARAM | awk '{print $1}'`
     iptables -D OUTPUT $line_number
-    echo "User $2 został odblokowany"
+    echo "User $PARAM został odblokowany"
 elif [ $ACTION = "transfer-restart" ] ; then
-    line_number=`iptables -t mangle -L POSTROUTING -v --line-numbers | grep ACCEPT | grep $2 | awk '{print $1}'`
+    line_number=`iptables -t mangle -L POSTROUTING -v --line-numbers | grep ACCEPT | grep $PARAM | awk '{print $1}'`
     iptables -t mangle -D POSTROUTING $line_number
-    iptables -t mangle -I POSTROUTING $line_number -o eth0 -p tcp -m owner --uid-owner $2 -m quota --quota $(($3*1024*1024*1024)) -j ACCEPT
+    iptables -t mangle -I POSTROUTING $line_number -o eth0 -p tcp -m owner --uid-owner $PARAM -m quota --quota $(($3*1024*1024*1024)) -j ACCEPT
 elif [ $ACTION = "passwd" ] ; then
-    HAVEVNC=`cat vnclist | grep -x $PARAM | wc -l`
-    HAVERT=`ls /var/rutorrent/rutorrent/conf/users | grep -w $PARAM | wc -l`
-    RUTORRENT_PASSWD='/usr/local/lighttpd/rutorrent_passwd'
     passwd $PARAM
     if [ $HAVERT != '0' ] ; then
         sed /$PARAM/d $RUTORRENT_PASSWD > tmp
@@ -27,6 +39,35 @@ elif [ $ACTION = "passwd" ] ; then
 	rm tmp
     fi
     if [ $HAVEVNC != '0' ] ; then
-	su $USER -c "vncpasswd"
+	su $PARAM -c "vncpasswd"
+    fi
+elif [ $ACTION = "remove" ] ; then
+    line_number=`iptables -t mangle -L POSTROUTING -v --line-numbers | grep ACCEPT | grep $PARAM | awk '{print $1}'`
+    iptables -t mangle -D POSTROUTING $line_number
+    line_number=`iptables -t mangle -L POSTROUTING -v --line-numbers | grep CLASSIFY | grep $PARAM | awk '{print $1}'`
+    iptables -t mangle -D POSTROUTING $line_number
+    if [ -d /root/archiwum ] ; then
+        createArchive
+    else
+	mkdir /root/archiwum
+	createArchive
+    fi
+    pkill -SIGKILL -u $PARAM
+    userdel -rf $PARAM
+    rm -rf /var/rutorrent/rutorrent/conf/users/$PARAM
+    rm -rf /var/run/screen/$PARAM
+    if [ $HAVEVNC != '0' ] ; then
+	sed /$PARAM/d vnclist > tmp
+	cat tmp > vnclist
+        rm tmp
+    fi
+    if [ $HAVERT != '0' ] ; then
+	sed /$PARAM/d $RUTORRENT_PASSWD > tmp
+	cat tmp > $RUTORRENT_PASSWD
+	rm tmp
+    fi
+    rm -rf /home/$PARAM
+    if [ -d /home2 ] ; then
+	rm -rf /home2/$PARAM
     fi
 fi
