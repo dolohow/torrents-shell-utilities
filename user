@@ -7,7 +7,7 @@ HAVEVNC=`cat vnclist | grep -x $PARAM | wc -l`
 HAVERT=`ls /var/rutorrent/rutorrent/conf/users | grep -w $PARAM | wc -l`
 RUTORRENT_PASSWD='/usr/local/lighttpd/rutorrent_passwd'
 
-createArchive() {
+create_archive() {
     mkdir /root/archiwum/$PARAM
     updatedb
     locate $PARAM > /root/archiwum/$PARAM/$PARAM.torrents
@@ -16,6 +16,12 @@ createArchive() {
     zcat /usr/local/lighttpd/logs/*gz | grep $PARAM | egrep -o '([0-9]{1,3}\.){3}[0-9]{1,3}' | sort -u >> /root/archiwum/$PARAM/$PARAM.ip
     cat /root/archiwum/$PARAM/$PARAM.ip | sort -u > /root/archiwum/$PARAM.ip-new
     mv /root/archiwum/$PARAM.ip-new /root/archiwum/$PARAM/$PARAM.ip
+}
+
+delete_chain() {
+    if [ $1 != '0' ] ; then
+        iptables -t mangle -D POSTROUTING $1
+    fi
 }
 
 if [ $ACTION = "block" ] ; then
@@ -43,14 +49,16 @@ elif [ $ACTION = "passwd" ] ; then
     fi
 elif [ $ACTION = "remove" ] ; then
     line_number=`iptables -t mangle -L POSTROUTING -v --line-numbers | grep ACCEPT | grep $PARAM | awk '{print $1}'`
-    iptables -t mangle -D POSTROUTING $line_number
+    delete_chain $line_number
     line_number=`iptables -t mangle -L POSTROUTING -v --line-numbers | grep CLASSIFY | grep $PARAM | awk '{print $1}'`
-    iptables -t mangle -D POSTROUTING $line_number
+    delete_chain $line_number
+    line_number=`iptables -L OUTPUT | grep $PARAM`
+    delete_chain $line_number
     if [ -d /root/archiwum ] ; then
-        createArchive
+        create_archive
     else
 	mkdir /root/archiwum
-	createArchive
+	create_archive
     fi
     pkill -SIGKILL -u $PARAM
     userdel -rf $PARAM
