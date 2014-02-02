@@ -33,7 +33,7 @@ elif [ $ACTION = "unblock" ] ; then
     echo "User $PARAM został odblokowany"
 elif [ $ACTION = "transfer-restart" ] ; then
     line_number=`iptables -t mangle -L POSTROUTING -v --line-numbers | grep ACCEPT | grep $PARAM | awk '{print $1}'`
-    if [ $($line_number | wc -l) != 0 ] ; then
+    if [ $($line_number | wc -l) != '0' ] ; then
         iptables -t mangle -D POSTROUTING $line_number
     else
 	line_number=`iptables -t mangle -L POSTROUTING -v --line-numbers | grep $PARAM | awk '{print $1}'`  
