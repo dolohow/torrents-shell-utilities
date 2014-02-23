@@ -2,88 +2,88 @@
 
 ACTION=$1
 USER=$2
+PATH_SCRIPT="$(readlink -f ${BASH_SOURCE[0]})"
 
-checkUser() {
-	VNCPORT=`ps aux | grep $USER | egrep -o "Xvnc[4]{0,1} \:[0-9]{1,2}" | awk '{print $2}'`
-	ISSTARTED=`pgrep -u $USER vnc | wc -l`
-	HAVEVNC=`cat vnclist | grep -x $USER | wc -l`
-	IP=`ifconfig  | egrep -o "([0-9]{1,3}\.){3}[0-9]{1,3}" | head -n1`
-	DISKQUOTA=`repquota -u -s -a | grep $USER | awk '{print $2'} | tail -n1`
-	if [ ! -e vnclist ] ; then
-		touch vnclist
-	fi
-	if [ $HAVEVNC = '0' ] ; then
-		echo "$USER - nie posiada vnc"
-		exit
-	fi
+check_user() {
+    VNCPORT=`ps aux | grep $USER | \
+        egrep -o "Xvnc[4]{0,1} \:[0-9]{1,2}" | awk '{print $2}'`
+    ISSTARTED=`pgrep -u $USER vnc | wc -l`
+    HAVEVNC=`cat vnclist | grep -x $USER | wc -l`
+    IP=`ifconfig  | egrep -o "([0-9]{1,3}\.){3}[0-9]{1,3}" | head -n1`
+    DISKQUOTA=`repquota -u -s -a | grep $USER | awk '{print $2'} | \
+        tail -n1`
+    if [ ! -e vnclist ] ; then
+        touch vnclist
+    fi
+    if [ $HAVEVNC = '0' ] ; then
+        echo "$USER - nie posiada vnc"
+        exit
+    fi
 }
 
-startVNC() {
-	checkUser
-	if [ $ISSTARTED != '0' ] ; then
-		echo "$USER - vnc jest już uruchomione"
-	elif [ $DISKQUOTA = '+-' ] ; then
-		echo "$USER - przekroczone miejsce na dysku"
-	else
-		su $USER -c "vncserver 2> /dev/null"
-		checkUser
-		echo "$USER - vnc zostało prawidłowo uruchomione"
-		echo "VNC: $IP$VNCPORT"
-	fi
+start_VNC() {
+    if [ $ISSTARTED != '0' ] ; then
+        echo "$USER - vnc jest już uruchomione"
+    elif [ $DISKQUOTA = '+-' ] ; then
+        echo "$USER - przekroczone miejsce na dysku"
+    else
+        su $USER -c "vncserver 2> /dev/null"
+        check_user
+        echo "$USER - vnc zostało prawidłowo uruchomione"
+        echo "VNC: $IP$VNCPORT"
+    fi
 }
 
-stopVNC() {
-	checkUser
-	if [ $ISSTARTED = '0' ] ; then
-		echo "$USER - vnc jest już zatrzymane"
-	else
-		su $USER -c "vncserver -kill $VNCPORT 2> /dev/null"
-		echo "$USER - vnc zostało zatrzymane"
-	fi
+stop_VNC() {
+    if [ $ISSTARTED = '0' ] ; then
+        echo "$USER - vnc jest już zatrzymane"
+    else
+    su $USER -c "vncserver -kill $VNCPORT 2> /dev/null"
+        echo "$USER - vnc zostało zatrzymane"
+    fi
 }
 
-restartVNC() {
-	stopVNC
-	sleep 2s
-	startVNC
+restart_VNC() {
+    stop_VNC
+    sleep 2s
+    start_VNC
 }
 
-statusVNC() {
-	checkUser
-	if [ $ISSTARTED = '0' ] ; then
-		echo "(0) $USER"
-	elif [ $ISSTARTED > '0' ] ; then
-		echo "(1) $USER - $IP$VNCPORT"
-	fi
+status_VNC() {
+    if [ $ISSTARTED = '0' ] ; then
+        echo "(0) $USER"
+    elif [ $ISSTARTED > '0' ] ; then
+        echo "(1) $USER - $IP$VNCPORT"
+    fi
 }
+
+action_all() {
+    for i in `cat vnclist` ; do
+        $PATH_SCRIPT $1 $i
+    done
+}
+
+check_user
 
 if [ $USER = "all" ] ; then
-	if [ $ACTION = "start" ] ; then
-		for i in `cat vnclist` ; do
-			/root/startvnc start $i
-		done
-	elif [ $ACTION = "stop" ] ; then
-		for i in `cat vnclist` ; do
-			/root/startvnc stop $i
-		done
-	elif [ $ACTION = "restart" ] ; then
-		for i in `cat vnclist` ; do
-			/root/startvnc restart $i
-		done
-	elif [ $ACTION = "status" ] ; then
-		for i in `cat vnclist` ; do
-			/root/startvnc status $i
-		done
-	fi
+    if [ $ACTION = "start" ] ; then
+        action_all start
+    elif [ $ACTION = "stop" ] ; then
+        action_all stop
+    elif [ $ACTION = "restart" ] ; then
+        action_all restart
+    elif [ $ACTION = "status" ] ; then
+        action_all status
+    fi
 
 elif [ $USER != "all" ] ; then
-	if [ $ACTION = 'start' ] ; then
-		startVNC
-	elif [ $ACTION = 'stop' ] ; then
-		stopVNC
-	elif [ $ACTION = 'restart' ] ; then
-		restartVNC
-	elif [ $ACTION = 'status' ] ; then
-		statusVNC
-	fi
+    if [ $ACTION = 'start' ] ; then
+        start_VNC
+    elif [ $ACTION = 'stop' ] ; then
+        stop_VNC
+    elif [ $ACTION = 'restart' ] ; then
+        restart_VNC
+    elif [ $ACTION = 'status' ] ; then
+        status_VNC
+    fi
 fi

@@ -2,6 +2,7 @@
 
 ACTION=$1
 USER=$2
+PATH_SCRIPT="$(readlink -f ${BASH_SOURCE[0]})"
 
 check_user() {
     if [ ! -e exclude ] ; then
@@ -63,7 +64,6 @@ start_rt() {
 }
 
 stop_rt() {
-    check_user
     if [ $ISSTARTED = '0' ] ; then
         echo "$USER - rtorrent jest już zatrzymany"
     else
@@ -79,7 +79,6 @@ restart_rt() {
 }
 
 status_rt() {
-    check_user
     if [ $ISSTARTED = '0' ] ; then
         echo "(0) $USER"
     else
@@ -92,12 +91,14 @@ action_all() {
         rt_users=`echo $rt_users | \
             sed -e 's/\/var\/rutorrent\/rutorrent\/conf\/users\///g'`
         if [ `cat exclude | grep $rt_users | wc -l` != 1 ] ; then
-            /root/startrt $1 $rt_users
+            $PATH_SCRIPT $1 $rt_users
         else
             echo "$rt_users ma wyłączone konto"
         fi
     done
 }
+
+check_user
 
 if [ $USER = "all" ] ; then
     if [ $ACTION = "start" ] ; then
