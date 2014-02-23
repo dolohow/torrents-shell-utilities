@@ -5,142 +5,155 @@ DISK="/home"
 MOUNTPOINT="/home"
 
 create_user() {
-  mkdir $DISK/$NICK
-  useradd -d $DISK/$NICK $NICK
-  chown -R $NICK:$NICK $DISK/$NICK/
+    mkdir $DISK/$NICK
+    useradd -d $DISK/$NICK $NICK
+    chown -R $NICK:$NICK $DISK/$NICK/
 }
 
 set_rtorrent() {
-  PORT=2`cat /dev/urandom | tr -dc 0-9 | head -c4`
-  mkdir /var/rutorrent/rutorrent/conf/users/$NICK
-  echo "<?php
-  \$scgi_port = 0;
-  \$scgi_host = \"unix://$DISK/$NICK/.rtorrent/rpc.socket\";
-  \$XMLRPCMountPoint = \"/RPC`cat /dev/urandom | tr -dc 0-9 | head -c10`\";
-  ?>" > /var/rutorrent/rutorrent/conf/users/$NICK/config.php
-  mkdir $DISK/$NICK/{downloads,\.rtorrent}
-  echo "execute = {sh,-c,rm -f $DISK/$NICK/.rtorrent/rpc.socket}
-  scgi_local = $DISK/$NICK/.rtorrent/rpc.socket
-  execute = {sh,-c,chmod 0666 $DISK/$NICK/.rtorrent/rpc.socket}
-  encoding_list = UTF-8
-  port_range = $PORT-$PORT
-  port_random = no
-  check_hash = no
-  directory = $DISK/$NICK/downloads
-  session = $DISK/$NICK/.rtorrent
-  dht = disable
-  peer_exchange = no
-  execute = {sh,-c,/usr/bin/php /var/rutorrent/rutorrent/php/initplugins.php $NICK &}
-  scheduler.max_active.set = $PROCESS" > $DISK/$NICK/.rtorrent.rc
-  ./htpasswd.py -b -c 1 $NICK $PASSWORDVALUE
-  cat 1 >> /usr/local/lighttpd/rutorrent_passwd
-  rm 1
-  chown root:root $DISK/$NICK/.rtorrent.rc
-  chmod 644 $DISK/$NICK/.rtorrent.rc
-  chown -R $NICK:$NICK $DISK/$NICK/{downloads,\.rtorrent}
-  ./startrt start $NICK > /dev/null
+    PORT=2`cat /dev/urandom | tr -dc 0-9 | head -c4`
+    mkdir /var/rutorrent/rutorrent/conf/users/$NICK
+    echo "<?php
+    \$scgi_port = 0;
+    \$scgi_host = \"unix://$DISK/$NICK/.rtorrent/rpc.socket\";
+    \$XMLRPCMountPoint = \"/RPC`cat /dev/urandom | tr -dc 0-9 | head -c10`\";
+    ?>" > /var/rutorrent/rutorrent/conf/users/$NICK/config.php
+    mkdir $DISK/$NICK/{downloads,\.rtorrent}
+    echo "execute = {sh,-c,rm -f $DISK/$NICK/.rtorrent/rpc.socket}
+    scgi_local = $DISK/$NICK/.rtorrent/rpc.socket
+    execute = {sh,-c,chmod 0666 $DISK/$NICK/.rtorrent/rpc.socket}
+    encoding_list = UTF-8
+    port_range = $PORT-$PORT
+    port_random = no
+    check_hash = no
+    directory = $DISK/$NICK/downloads
+    session = $DISK/$NICK/.rtorrent
+    dht = disable
+    peer_exchange = no
+    execute = {sh,-c,/usr/bin/php /var/rutorrent/rutorrent/php/initplugins.php $NICK &}
+    scheduler.max_active.set = $PROCESS" > $DISK/$NICK/.rtorrent.rc
+    ./htpasswd.py -b -c 1 $NICK $PASSWORDVALUE
+    cat 1 >> /usr/local/lighttpd/rutorrent_passwd
+    rm 1
+    chown root:root $DISK/$NICK/.rtorrent.rc
+    chmod 644 $DISK/$NICK/.rtorrent.rc
+    chown -R $NICK:$NICK $DISK/$NICK/{downloads,\.rtorrent}
+    ./startrt start $NICK > /dev/null
 }
 
 set_deluge() {
-  echo "Not implemented yet"
+    echo "Not implemented yet"
 }
 
 set_rapidleech() {
-  mkdir $DISK/$NICK/public_html
-  svn checkout http://rapidleech.googlecode.com/svn/trunk/ rapidleech-read-only
-  mv rapidleech-read-only $DISK/$NICK/public_html/rl
-  cp /usr/bin/rar $DISK/$NICK/public_html/rl/rar/
-  chmod +x $DISK/$NICK/public_html/rl/rar/*
-  chown -R $NICK:$NICK $DISK/$NICK/public_html
-  chmod -R 777 $DISK/$NICK/public_html/rl
+    mkdir $DISK/$NICK/public_html
+    svn checkout http://rapidleech.googlecode.com/svn/trunk/ rapidleech-read-only
+    mv rapidleech-read-only $DISK/$NICK/public_html/rl
+    cp /usr/bin/rar $DISK/$NICK/public_html/rl/rar/
+    chmod +x $DISK/$NICK/public_html/rl/rar/*
+    chown -R $NICK:$NICK $DISK/$NICK/public_html
+    chmod -R 777 $DISK/$NICK/public_html/rl
 }
 
 set_VNC() {
-  mkdir $DISK/$NICK/.vnc
-  cp vnc_files/.xscreensaver $DISK/$NICK/
-  cp vnc_files/xstartup $DISK/$NICK/.vnc
-  chown -R $NICK:$NICK $DISK/$NICK/.vnc
-  mkdir $DISK/$NICK/Desktop
-  cp vnc_files/[^x]* $DISK/$NICK/Desktop
-  chown $NICK:$NICK $DISK/$NICK/Desktop/*
-  chmod +x $DISK/$NICK/Desktop/*
-  chmod +x $DISK/$NICK/.vnc/xstartup
-  echo $NICK >> vnclist
+    mkdir $DISK/$NICK/.vnc
+    cp vnc_files/.xscreensaver $DISK/$NICK/
+    cp vnc_files/xstartup $DISK/$NICK/.vnc
+    chown -R $NICK:$NICK $DISK/$NICK/.vnc
+    mkdir $DISK/$NICK/Desktop
+    cp vnc_files/[^x]* $DISK/$NICK/Desktop
+    chown $NICK:$NICK $DISK/$NICK/Desktop/*
+    chmod +x $DISK/$NICK/Desktop/*
+    chmod +x $DISK/$NICK/.vnc/xstartup
+    echo $NICK >> vnclist
 }
 
 set_quota() {
-  quotatool -u $NICK -bl $((QUOTAVALUE*1024))M $MOUNTPOINT
+    quotatool -u $NICK -bl $((QUOTAVALUE*1024))M $MOUNTPOINT
 }
 
 set_password() {
-  passwd $NICK
+    passwd $NICK
 }
 
 set_transfer_limit() {
-  # zaokraglanie limitu
-  VALUE=`echo $(($TRANSFERLIMITVALUE*1024*1024*1024)) | awk -F'.' '{print $1}'`
-  LAST=`iptables -t mangle -L POSTROUTING -v | tail -n1 | grep -o 1\:.* | awk -F: '{print $2}'`
-  iptables -t mangle -A POSTROUTING -o eth0 -p tcp -m owner --uid-owner $NICK -m quota --quota $VALUE -j ACCEPT
-  iptables -t mangle -A POSTROUTING -o eth0 -p tcp -m owner --uid-owner $NICK -j CLASSIFY --set-class 1:$(($LAST+1))
-  iptables-save > /etc/iptables
+    QUOTA_VALUE=`$(($TRANSFERLIMITVALUE*1024*1024*1024))`
+    NUMBER_OF_RULES=`iptables -t mangle -L POSTROUTING -v | grep -o 1:.* | grep -Po [0-9]{2} | wc -l`
+    LIST_OF_NUMBERS=`iptables -t mangle -L POSTROUTING -v | grep -o 1:.* | grep -Po [0-9]{2}`
+    SET_NUMBER=0
+    if [ $NUMBER_OF_RULES = 0 ] ; then
+        SET_NUMBER=11
+    else
+        i=11
+        for number in $LIST_OF_NUMBERS ; do
+            if [ $i != $number ] ; then
+                SET_NUMBER=$i
+                break
+            fi
+            let i++
+        done
+    fi
+    iptables -t mangle -A POSTROUTING -o eth0 -p tcp -m owner --uid-owner $NICK -m quota --quota $QUOTA_VALUE -j ACCEPT
+    iptables -t mangle -A POSTROUTING -o eth0 -p tcp -m owner --uid-owner $NICK -j CLASSIFY --set-class 1:$SET_NUMBER
+    iptables-save > /etc/iptables
 }
 
 final() {
-  if [ $RTORRENT ] ; then
-    echo "webUI: http://$IP/rutorrent"
-  fi
-  if [ $RAPIDLEECH ] ; then
-    echo "Rapidleech: http://$IP/~$NICK/rl"
-  fi
-  if [ $VNC ] ; then
-    ./startvnc start $NICK
-  fi
-  echo "FTP: $IP"
-  echo "panel: http://woox.pl"
+    if [ $RTORRENT ] ; then
+        echo "webUI: http://$IP/rutorrent"
+    fi
+    if [ $RAPIDLEECH ] ; then
+        echo "Rapidleech: http://$IP/~$NICK/rl"
+    fi
+    if [ $VNC ] ; then
+        ./startvnc start $NICK
+    fi
+    echo "FTP: $IP"
+    echo "panel: http://woox.pl"
 }
 
 while [ $# -gt 0 ] ; do
-  arg="$1"
-  shift
-  if [ "$arg" = "-n" ] ; then
-    NICK="$1"
-    create_user
+    arg="$1"
     shift
-  elif [ "$arg" = "-p" ] ; then
-    PASSWORDVALUE="$1"
-    set_password
-    shift
-  elif [ "$arg" = "-r" ] ; then
-    RTORRENT=y
-    PROCESS="$1"
-    set_rtorrent
-    shift
-  elif [ "$arg" = "-rl" ] ; then
-    RAPIDLEECH=y
-    set_rapidleech
-  elif [ "$arg" = "-v" ] ; then
-    VNC=y
-    set_VNC
-  elif [ "$arg" = "-q" ] ; then
-    QUOTAVALUE="$1"
-    set_quota
-    shift
-  elif [ "$arg" = "-d" ] ; then
-    DISK="$1"
-    shift
-  elif [ "$arg" = "-mp" ] ; then
-    MOUNTPOINT="$1"
-    shift
-  elif [ "$arg" = "--deluge" ] ; then
-    DELUGE=y
-    set_deluge
-  elif [ "$arg" = "-t" ] ; then
-    TRANSFERLIMITVALUE="$1"
-    set_transfer_limit
-    shift
-  else
-    echo "./add -n NICK -p PASSWORD [OPTIONS]"
-  fi
+    if [ "$arg" = "-n" ] ; then
+        NICK="$1"
+        create_user
+        shift
+    elif [ "$arg" = "-p" ] ; then
+        PASSWORDVALUE="$1"
+        set_password
+        shift
+    elif [ "$arg" = "-r" ] ; then
+        RTORRENT=y
+        PROCESS="$1"
+        set_rtorrent
+        shift
+    elif [ "$arg" = "-rl" ] ; then
+        RAPIDLEECH=y
+        set_rapidleech
+    elif [ "$arg" = "-v" ] ; then
+        VNC=y
+        set_VNC
+    elif [ "$arg" = "-q" ] ; then
+        QUOTAVALUE="$1"
+        set_quota
+        shift
+    elif [ "$arg" = "-d" ] ; then
+        DISK="$1"
+        shift
+    elif [ "$arg" = "-mp" ] ; then
+        MOUNTPOINT="$1"
+        shift
+    elif [ "$arg" = "--deluge" ] ; then
+        DELUGE=y
+        set_deluge
+    elif [ "$arg" = "-t" ] ; then
+        TRANSFERLIMITVALUE="$1"
+        set_transfer_limit
+        shift
+    else
+        echo "./add -n NICK -p PASSWORD [OPTIONS]"
+    fi
 done
 
 final
