@@ -98,8 +98,6 @@ action_all() {
     done
 }
 
-check_user
-
 if [ $USER = "all" ] ; then
     if [ $ACTION = "start" ] ; then
         action_all start
@@ -112,6 +110,7 @@ if [ $USER = "all" ] ; then
     fi
 
 elif [ $USER != "all" ] ; then
+    check_user
     if [ $ACTION = "start" ] ; then
         start_rt
     elif [ $ACTION = "stop" ] ; then
