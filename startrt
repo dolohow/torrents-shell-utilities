@@ -7,57 +7,60 @@ PATH_SCRIPT="$(readlink -f ${BASH_SOURCE[0]})"
 check_user() {
     if [ ! -e exclude ] ; then
         touch exclude
-    fi
-    EXIST=`ls /var/rutorrent/rutorrent/conf/users | grep -w $USER | \
-        wc -l`
-    if [ $EXIST = '0' ] ; then
-        echo "$USER - nie posiada rtorrenta"
+    elif [ `cat exclude | grep $1 | wc -l` > 0 ] ; then
+        echo "$1 ma wyłączone konto"
         exit
     fi
-    ISSTARTED=`pgrep -u $USER rtorrent | wc -l`
+
+    EXIST=`ls /var/rutorrent/rutorrent/conf/users | grep -w $1 | wc -l`
+    if [ $EXIST = '0' ] ; then
+        echo "$1 - nie posiada rtorrenta"
+        exit
+    fi
+
+    ISSTARTED=`pgrep -u $1 rtorrent | wc -l`
     if [ -a /usr/sbin/repquota ] ; then
-        DISKQUOTA=`repquota -u -s -a | grep $USER | awk '{print $2'} | \
-            tail -n1`
+        DISKQUOTA=`repquota -u -s -a | grep $1 | awk '{print $2'} | tail -n1`
     else
         DISKQUOTA=0
     fi
 }
 
 start_process() {
-    su $USER -c "screen -dmS rtorrent rtorrent"
-    echo "$USER - czekam 5 sekund na potwierdzenie działania rtorrenta"
+    su $1 -c "screen -dmS rtorrent rtorrent"
+    echo "$1 - czekam 5 sekund na potwierdzenie działania rtorrenta"
     sleep 5s
 }
 
 start_rt() {
     for ((c=0; c<4; c++)) ; do
-        check_user
+        check_user $1
         if [ $ISSTARTED != '0' ] ; then
-            echo "$USER - rtorrent jest już uruchomiony"
+            echo "$1 - rtorrent jest już uruchomiony"
             break
         # TODO: Find a better way for checking quota
         elif [ $c = '0' ] && [ $DISKQUOTA = '+-' ] ; then
-            echo "$USER - przekroczone miejsce na dysku"
+            echo "$1 - przekroczone miejsce na dysku"
             break
 	elif [ $c = '0' ] ; then
             start_process
         elif [ $c = '1' ] ; then
-            echo "$USER - kasuje pliki rtorrenta i sesji screen"
-            rm -f /home*/$USER/.rtorrent/rpc.socket
-            rm -f /home*/$USER/.rtorrent/rtorrent.lock
+            echo "$1 - kasuje pliki rtorrenta i sesji screen"
+            rm -f /home*/$1/.rtorrent/rpc.socket
+            rm -f /home*/$1/.rtorrent/rtorrent.lock
             # Legacy
-            rm -f /home*/$USER/rtorrent/rpc.socket
-            rm -f /home*/$USER/rtorrent/rtorrent.lock
-            rm -f /home*/$USER/rtorrent/session/rpc.socket
-            rm -f /home*/$USER/rtorrent/session/rtorrent.lock
-            rm -fr /var/run/screen/S-$USER
+            rm -f /home*/$1/rtorrent/rpc.socket
+            rm -f /home*/$1/rtorrent/rtorrent.lock
+            rm -f /home*/$1/rtorrent/session/rpc.socket
+            rm -f /home*/$1/rtorrent/session/rtorrent.lock
+            rm -fr /var/run/screen/S-$1
             start_process
         elif [ $c = '2' ] ; then
-            echo "$USER - Usuwam wszystkie załadowane torrenty"
-            rm -f /home*/$USER/.rtorrent/*
+            echo "$1 - Usuwam wszystkie załadowane torrenty"
+            rm -f /home*/$1/.rtorrent/*
             # Legacy
-            rm -f /home*/$USER/rtorrent/session/*
-            rm -f /home*/$USER/rtorrent/*
+            rm -f /home*/$1/rtorrent/session/*
+            rm -f /home*/$1/rtorrent/*
             start_process
         fi
     done
@@ -65,10 +68,10 @@ start_rt() {
 
 stop_rt() {
     if [ $ISSTARTED = '0' ] ; then
-        echo "$USER - rtorrent jest już zatrzymany"
+        echo "$1 - rtorrent jest już zatrzymany"
     else
-        pkill -SIGTERM -u $USER rtorrent
-        echo "$USER - rtorrent został zatrzymany"
+        pkill -SIGTERM -u $1 rtorrent
+        echo "$1 - rtorrent został zatrzymany"
     fi
 }
 
@@ -80,9 +83,9 @@ restart_rt() {
 
 status_rt() {
     if [ $ISSTARTED = '0' ] ; then
-        echo "(0) $USER"
+        echo "(0) $1"
     else
-        echo "(1) $USER"
+        echo "(1) $1"
     fi
 }
 
@@ -90,11 +93,7 @@ action_all() {
     for rt_users in /var/rutorrent/rutorrent/conf/users/* ; do
         rt_users=`echo $rt_users | \
             sed -e 's/\/var\/rutorrent\/rutorrent\/conf\/users\///g'`
-        if [ `cat exclude | grep $rt_users | wc -l` != 1 ] ; then
-            $PATH_SCRIPT $1 $rt_users
-        else
-            echo "$rt_users ma wyłączone konto"
-        fi
+        $PATH_SCRIPT $1 $rt_users
     done
 }
 
@@ -110,14 +109,14 @@ if [ $USER = "all" ] ; then
     fi
 
 elif [ $USER != "all" ] ; then
-    check_user
+    check_user $USER
     if [ $ACTION = "start" ] ; then
-        start_rt
+        start_rt $USER
     elif [ $ACTION = "stop" ] ; then
-        stop_rt
+        stop_rt $USER
     elif [ $ACTION = "restart" ] ; then
-        restart_rt
+        restart_rt $USER
     elif [ $ACTION = "status" ] ; then
-        status_rt
+        status_rt $USER
     fi
 fi
