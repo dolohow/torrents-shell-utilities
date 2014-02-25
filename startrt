@@ -43,7 +43,7 @@ start_rt() {
             echo "$1 - przekroczone miejsce na dysku"
             break
 	elif [ $c = '0' ] ; then
-            start_process
+            start_process $1
         elif [ $c = '1' ] ; then
             echo "$1 - kasuje pliki rtorrenta i sesji screen"
             rm -f /home*/$1/.rtorrent/rpc.socket
@@ -54,14 +54,14 @@ start_rt() {
             rm -f /home*/$1/rtorrent/session/rpc.socket
             rm -f /home*/$1/rtorrent/session/rtorrent.lock
             rm -fr /var/run/screen/S-$1
-            start_process
+            start_process $1
         elif [ $c = '2' ] ; then
             echo "$1 - Usuwam wszystkie załadowane torrenty"
             rm -f /home*/$1/.rtorrent/*
             # Legacy
             rm -f /home*/$1/rtorrent/session/*
             rm -f /home*/$1/rtorrent/*
-            start_process
+            start_process $1
         fi
     done
 }
