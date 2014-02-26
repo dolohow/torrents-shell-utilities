@@ -5,41 +5,41 @@ USER=$2
 PATH_SCRIPT="$(readlink -f ${BASH_SOURCE[0]})"
 
 check_user() {
-    VNCPORT=`ps aux | grep $USER | \
-        egrep -o "Xvnc[4]{0,1} \:[0-9]{1,2}" | awk '{print $2}'`
-    ISSTARTED=`pgrep -u $USER vnc | wc -l`
-    HAVEVNC=`cat vnclist | grep -x $USER | wc -l`
+    VNCPORT=`ps aux | grep $1 | \ egrep -o "Xvnc[4]{0,1} \:[0-9]{1,2}" | \
+        awk '{print $2}'`
+    ISSTARTED=`pgrep -u $1 vnc | wc -l`
+    HAVEVNC=`cat vnclist | grep -x $1 | wc -l`
     IP=`ifconfig  | egrep -o "([0-9]{1,3}\.){3}[0-9]{1,3}" | head -n1`
-    DISKQUOTA=`repquota -u -s -a | grep $USER | awk '{print $2'} | \
+    DISKQUOTA=`repquota -u -s -a | grep $1 | awk '{print $2'} | \
         tail -n1`
     if [ ! -e vnclist ] ; then
         touch vnclist
     fi
     if [ $HAVEVNC = '0' ] ; then
-        echo "$USER - nie posiada vnc"
+        echo "$1 - nie posiada vnc"
         exit
     fi
 }
 
 start_VNC() {
     if [ $ISSTARTED != '0' ] ; then
-        echo "$USER - vnc jest już uruchomione"
+        echo "$1 - vnc jest już uruchomione"
     elif [ $DISKQUOTA = '+-' ] ; then
-        echo "$USER - przekroczone miejsce na dysku"
+        echo "$1 - przekroczone miejsce na dysku"
     else
-        su $USER -c "vncserver 2> /dev/null"
+        su $1 -c "vncserver 2> /dev/null"
         check_user
-        echo "$USER - vnc zostało prawidłowo uruchomione"
+        echo "$1 - vnc zostało prawidłowo uruchomione"
         echo "VNC: $IP$VNCPORT"
     fi
 }
 
 stop_VNC() {
     if [ $ISSTARTED = '0' ] ; then
-        echo "$USER - vnc jest już zatrzymane"
+        echo "$1 - vnc jest już zatrzymane"
     else
-    su $USER -c "vncserver -kill $VNCPORT 2> /dev/null"
-        echo "$USER - vnc zostało zatrzymane"
+    su $1 -c "vncserver -kill $VNCPORT 2> /dev/null"
+        echo "$1 - vnc zostało zatrzymane"
     fi
 }
 
@@ -51,19 +51,17 @@ restart_VNC() {
 
 status_VNC() {
     if [ $ISSTARTED = '0' ] ; then
-        echo "(0) $USER"
+        echo "(0) $1"
     elif [ $ISSTARTED > '0' ] ; then
-        echo "(1) $USER - $IP$VNCPORT"
+        echo "(1) $1 - $IP$VNCPORT"
     fi
 }
 
 action_all() {
-    for i in `cat vnclist` ; do
-        $PATH_SCRIPT $1 $i
+    for vnc_users in `cat vnclist` ; do
+        $PATH_SCRIPT $1 $vnc_users
     done
 }
-
-check_user
 
 if [ $USER = "all" ] ; then
     if [ $ACTION = "start" ] ; then
@@ -77,13 +75,14 @@ if [ $USER = "all" ] ; then
     fi
 
 elif [ $USER != "all" ] ; then
+    check_user $USER
     if [ $ACTION = 'start' ] ; then
-        start_VNC
+        start_VNC $USER
     elif [ $ACTION = 'stop' ] ; then
-        stop_VNC
+        stop_VNC $USER
     elif [ $ACTION = 'restart' ] ; then
-        restart_VNC
+        restart_VNC $USER
     elif [ $ACTION = 'status' ] ; then
-        status_VNC
+        status_VNC $USER
     fi
 fi
