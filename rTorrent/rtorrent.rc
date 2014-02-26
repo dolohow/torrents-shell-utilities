@@ -1,0 +1,13 @@
+execute = {sh,-c,rm -f DISK/USER/.rtorrent/rpc.socket}
+scgi_local = DISK/USER/.rtorrent/rpc.socket
+execute = {sh,-c,chmod 0666 DISK/USER/.rtorrent/rpc.socket}
+encoding_list = UTF-8
+port_range = PORT-PORT
+port_random = no
+check_hash = no
+directory = DISK/USER/downloads
+session = DISK/USER/.rtorrent
+dht = disable
+peer_exchange = no
+execute = {sh,-c,/usr/bin/php /var/rutorrent/rutorrent/php/initplugins.php USER &}
+scheduler.max_active.set = MAX_ACTIVE

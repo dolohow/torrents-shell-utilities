@@ -1,0 +1,7 @@
+#!/bin/bash
+
+POINT=`cat /dev/urandom | tr -dc 0-9 | head -c10`
+DISK='/home'
+NICK='t3rr0r'
+
+sed -e s/USER/$NICK/g -e s,DISK,$DISK,g -e s/_/$POINT/g config.php > file
