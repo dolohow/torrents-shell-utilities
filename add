@@ -11,33 +11,32 @@ create_user() {
 }
 
 set_rtorrent() {
-    PORT=2`cat /dev/urandom | tr -dc 0-9 | head -c4`
+    port=2`cat /dev/urandom | tr -dc 0-9 | head -c4`
+    point=`cat /dev/urandom | tr -dc 0-9 | head -c10`
+
     mkdir /var/rutorrent/rutorrent/conf/users/$NICK
-    echo "<?php
-    \$scgi_port = 0;
-    \$scgi_host = \"unix://$DISK/$NICK/.rtorrent/rpc.socket\";
-    \$XMLRPCMountPoint = \"/RPC`cat /dev/urandom | tr -dc 0-9 | head -c10`\";
-    ?>" > /var/rutorrent/rutorrent/conf/users/$NICK/config.php
-    mkdir $DISK/$NICK/{downloads,\.rtorrent}
-    echo "execute = {sh,-c,rm -f $DISK/$NICK/.rtorrent/rpc.socket}
-    scgi_local = $DISK/$NICK/.rtorrent/rpc.socket
-    execute = {sh,-c,chmod 0666 $DISK/$NICK/.rtorrent/rpc.socket}
-    encoding_list = UTF-8
-    port_range = $PORT-$PORT
-    port_random = no
-    check_hash = no
-    directory = $DISK/$NICK/downloads
-    session = $DISK/$NICK/.rtorrent
-    dht = disable
-    peer_exchange = no
-    execute = {sh,-c,/usr/bin/php /var/rutorrent/rutorrent/php/initplugins.php $NICK &}
-    scheduler.max_active.set = $PROCESS" > $DISK/$NICK/.rtorrent.rc
+    mkdir $DISK/$NICK/{downloads,.rtorrent}
+
+    sed -e s/USER/$NICK/g \
+        -e s,DISK,$DISK,g \
+        -e s/_/$point/g \
+        rTorrent/config.php \
+        > /var/rutorrent/rutorrent/conf/users/$NICK/config.php
+    sed -e s/USER/$NICK/g \
+        -e s,DISK,$DISK,g \
+        -e s/PORT/$port/g \
+        -e s/MAX_ACTIVE/$PROCESS/g \
+        rTorrent/rtorrent.rc \
+        > plik $DISK/$NICK/.rtorrent.rc
+
     ./htpasswd.py -b -c 1 $NICK $PASSWORDVALUE
     cat 1 >> /usr/local/lighttpd/rutorrent_passwd
     rm 1
+
     chown root:root $DISK/$NICK/.rtorrent.rc
+    chown -R $NICK:$NICK $DISK/$NICK/{downloads,.rtorrent}
     chmod 644 $DISK/$NICK/.rtorrent.rc
-    chown -R $NICK:$NICK $DISK/$NICK/{downloads,\.rtorrent}
+
     ./startrt start $NICK > /dev/null
 }
 
@@ -57,14 +56,19 @@ set_rapidleech() {
 
 set_VNC() {
     mkdir $DISK/$NICK/.vnc
-    cp vnc_files/.xscreensaver $DISK/$NICK/
-    cp vnc_files/xstartup $DISK/$NICK/.vnc
-    chown -R $NICK:$NICK $DISK/$NICK/.vnc
     mkdir $DISK/$NICK/Desktop
-    cp vnc_files/[^x]* $DISK/$NICK/Desktop
+
+    cp vnc_files/xscreensaver $DISK/$NICK/.xscreensaver
+    cp vnc_files/xstartup $DISK/$NICK/.vnc
+    cp vnc_files/kopiowanie $DISK/$NICK/Desktop
+    #cp vnc_files/[^x]* $DISK/$NICK/Desktop
+
+    chown -R $NICK:$NICK $DISK/$NICK/.vnc
     chown $NICK:$NICK $DISK/$NICK/Desktop/*
+
     chmod +x $DISK/$NICK/Desktop/*
     chmod +x $DISK/$NICK/.vnc/xstartup
+
     echo $NICK >> vnclist
 }
 
