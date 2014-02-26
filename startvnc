@@ -28,7 +28,6 @@ start_VNC() {
         echo "$1 - przekroczone miejsce na dysku"
     else
         su $1 -c "vncserver 2> /dev/null"
-        check_user
         echo "$1 - vnc zostało prawidłowo uruchomione"
         echo "VNC: $IP$VNCPORT"
     fi
@@ -38,15 +37,15 @@ stop_VNC() {
     if [ $ISSTARTED = '0' ] ; then
         echo "$1 - vnc jest już zatrzymane"
     else
-    su $1 -c "vncserver -kill $VNCPORT 2> /dev/null"
+        su $1 -c "vncserver -kill $VNCPORT 2> /dev/null"
         echo "$1 - vnc zostało zatrzymane"
     fi
 }
 
 restart_VNC() {
-    stop_VNC
+    stop_VNC $1
     sleep 2s
-    start_VNC
+    start_VNC $1
 }
 
 status_VNC() {
