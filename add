@@ -27,7 +27,7 @@ set_rtorrent() {
         -e s/PORT/$port/g \
         -e s/MAX_ACTIVE/$PROCESS/g \
         rTorrent/rtorrent.rc \
-        > plik $DISK/$NICK/.rtorrent.rc
+        > $DISK/$NICK/.rtorrent.rc
 
     ./htpasswd.py -b -c 1 $NICK $PASSWORDVALUE
     cat 1 >> /usr/local/lighttpd/rutorrent_passwd
