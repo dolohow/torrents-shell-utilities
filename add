@@ -81,18 +81,21 @@ set_password() {
 }
 
 set_transfer_limit() {
-    QUOTA_VALUE=`$(($TRANSFERLIMITVALUE*1024*1024*1024))`
+    QUOTA_VALUE=$(($TRANSFERLIMITVALUE*1024*1024*1024))
     NUMBER_OF_RULES=`iptables -t mangle -L POSTROUTING -v | grep -o 1:.* | grep -Po [0-9]{2} | wc -l`
-    LIST_OF_NUMBERS=`iptables -t mangle -L POSTROUTING -v | grep -o 1:.* | grep -Po [0-9]{2}`
+    LIST_OF_NUMBERS=`iptables -t mangle -L POSTROUTING -v | grep -o 1:.* | grep -Po [0-9]{2} | xargs -n1 | sort -u`
     SET_NUMBER=0
     if [ $NUMBER_OF_RULES = 0 ] ; then
         SET_NUMBER=11
     else
         i=11
         for number in $LIST_OF_NUMBERS ; do
+            SET_NUMBER=$i
             if [ $i != $number ] ; then
-                SET_NUMBER=$i
                 break
+            fi
+            if [ $(($i-10)) = $NUMBER_OF_RULES ] ; then
+                SET_NUMBER=$(($i+1))
             fi
             let i++
         done
