@@ -19,7 +19,7 @@ set_rtorrent() {
 
     sed -e s/USER/$NICK/g \
         -e s,DISK,$DISK,g \
-        -e s/_/$point/g \
+        -e s/PORT/$point/g \
         rTorrent/config.php \
         > /var/rutorrent/rutorrent/conf/users/$NICK/config.php
     sed -e s/USER/$NICK/g \
