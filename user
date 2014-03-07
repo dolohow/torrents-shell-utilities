@@ -39,16 +39,16 @@ elif [ $1 = "unblock" ] ; then
 
 elif [ $1 = "transfer-restart" ] ; then
     line=`iptables -t mangle -L POSTROUTING -v --line-numbers | \
-        grep $2 | awk '{print $1}' | xargs -n1 | sort -ur`
+        grep $2 | awk '{print $1}'`
     class=`iptables -t mangle -L POSTROUTING -v | grep $2 | \
         grep -o 1:.* | grep -Po [0-9]{2}`
-    for i in $line ; do
+    for i in $(echo $line | xargs -n1 | sort -ur); do
         iptables -t mangle -D POSTROUTING $i
     done
     iptables -t mangle -I POSTROUTING $(echo $line | awk '{print $1}') \
         -o eth0 -p tcp -m owner --uid-owner $2 \
         -m quota --quota $(($3*1024*1024*1024)) -j ACCEPT
-    iptables -t mangle -I POSTROUTING $(echo $line | awk '{print $2}') \
+    iptables -t mangle -I POSTROUTING $(echo $line | awk '{print $1+1}') \
         -o eth0 -p tcp -m owner --uid-owner $2 \
         -j CLASSIFY --set-class 1:$class
 
