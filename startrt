@@ -76,9 +76,9 @@ stop_rt() {
 }
 
 restart_rt() {
-    stop_rt
+    stop_rt $USER
     sleep 2s
-    start_rt
+    start_rt $USER
 }
 
 status_rt() {
