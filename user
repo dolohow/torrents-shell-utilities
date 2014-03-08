@@ -29,6 +29,7 @@ create_archive() {
 if [ $1 = "block" ] ; then
     iptables -A OUTPUT -p tcp -m owner --uid-owner $2 -j DROP
     echo "$2 - konto zablokowane"
+    iptables-save > /etc/iptables.save
 
 elif [ $1 = "unblock" ] ; then
     line=`iptables -L OUTPUT --line-numbers | grep $2 | awk '{print $1}'`
@@ -36,6 +37,7 @@ elif [ $1 = "unblock" ] ; then
         iptables -D OUTPUT $i
     done
     echo "$2 - został odblokowany"
+    iptables-save > /etc/iptables.save
 
 elif [ $1 = "transfer-restart" ] ; then
     line=`iptables -t mangle -L POSTROUTING -v --line-numbers | \

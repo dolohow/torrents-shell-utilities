@@ -102,7 +102,7 @@ set_transfer_limit() {
     fi
     iptables -t mangle -A POSTROUTING -o eth0 -p tcp -m owner --uid-owner $NICK -m quota --quota $QUOTA_VALUE -j ACCEPT
     iptables -t mangle -A POSTROUTING -o eth0 -p tcp -m owner --uid-owner $NICK -j CLASSIFY --set-class 1:$SET_NUMBER
-    iptables-save > /etc/iptables
+    iptables-save > /etc/iptables.save
 }
 
 final() {
