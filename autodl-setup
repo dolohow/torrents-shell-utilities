@@ -107,7 +107,7 @@ HTPASSWD_PY_SCRIPT_URL2="http://sourceforge.net/projects/autodl-irssi/files/inst
 NGINX_NAME="nginx-1.0.5"
 NGINX_URL="http://nginx.org/download/$NGINX_NAME.tar.gz"
 
-LIGHTTPD_NAME="lighttpd-1.4.34"
+LIGHTTPD_NAME="lighttpd-1.4.35"
 LIGHTTPD_URL="http://download.lighttpd.net/lighttpd/releases-1.4.x/$LIGHTTPD_NAME.tar.gz"
 
 MOD_SCGI_VERSION="1.14"
