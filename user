@@ -70,7 +70,7 @@ elif [ $1 = "passwd" ] ; then
 elif [ $1 = "remove" ] ; then
     line=`iptables -t mangle -L POSTROUTING -v --line-numbers | \
         grep $2 | awk '{print $1}'`
-    for i in $line ; do
+    for i in $(echo $line | xargs -n1 | sort -ur); do
         iptables -t mangle -D POSTROUTING $i
     done
 
