@@ -42,6 +42,7 @@ set_rtorrent() {
 
 set_deluge() {
     echo "Not implemented yet"
+    exit
 }
 
 set_rapidleech() {
@@ -64,7 +65,7 @@ set_VNC() {
     #cp vnc_files/[^x]* $DISK/$NICK/Desktop
 
     chown -R $NICK:$NICK $DISK/$NICK/.vnc
-    chown $NICK:$NICK $DISK/$NICK/Desktop/*
+    chown -R $NICK:$NICK $DISK/$NICK/Desktop/
 
     chmod +x $DISK/$NICK/Desktop/*
     chmod +x $DISK/$NICK/.vnc/xstartup
@@ -73,7 +74,7 @@ set_VNC() {
 }
 
 set_quota() {
-    quotatool -u $NICK -bl $((QUOTAVALUE*1024))M $MOUNTPOINT
+    quotatool -u $NICK -bl $QUOTAVALUE\G $MOUNTPOINT
 }
 
 set_password() {
