@@ -18,7 +18,7 @@ check_user() {
         exit
     fi
 
-    ISSTARTED=`pgrep -u $1 rtorrent | wc -l`
+    ISSTARTED=`pgrep -u $1 -f rtorrent | wc -l`
     if [ -a /usr/sbin/repquota ] ; then
         DISKQUOTA=`repquota -u -s -a | grep $1 | awk '{print $2'} | tail -n1`
     else
