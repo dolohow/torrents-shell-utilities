@@ -70,7 +70,7 @@ stop_rt() {
     if [ $ISSTARTED = '0' ] ; then
         echo "$1 - rtorrent jest już zatrzymany"
     else
-        pkill -SIGTERM -u $1 rtorrent
+        pkill -SIGTERM -u $1 -f rtorrent
         echo "$1 - rtorrent został zatrzymany"
     fi
 }
