@@ -81,7 +81,7 @@ vel_recv=$(get_velocity $received_bytes $old_received_bytes)
 vel_trans=$(get_velocity $transmitted_bytes $old_transmitted_bytes)
 
 
-/usr/bin/wget -q -O - 'http://woox.pl/woox.php?info2=1&upload='$vel_trans'&download='$vel_recv'&host='$hostname'' >/dev/null 2>&1
-/usr/bin/wget -q -O - 'http://woox.pl/woox.php?info=1&load='$load'&dysk='$hdd'&host='$hostname'' >/dev/null 2>&1
-/usr/bin/wget -q -O - 'http://woox.pl/woox.php?uzytkownicy=1'$array'' >/dev/null 2>&1 
-/usr/bin/wget -q -O - 'http://woox.pl/woox.php?info3=1&transfer='$transfer'' >/dev/null 2>&1 
+/usr/bin/wget -q -O - 'http://old.woox.pl/woox.php?info2=1&upload='$vel_trans'&download='$vel_recv'&host='$hostname'' >/dev/null 2>&1
+/usr/bin/wget -q -O - 'http://old.woox.pl/woox.php?info=1&load='$load'&dysk='$hdd'&host='$hostname'' >/dev/null 2>&1
+/usr/bin/wget -q -O - 'http://old.woox.pl/woox.php?uzytkownicy=1'$array'' >/dev/null 2>&1 
+/usr/bin/wget -q -O - 'http://old.woox.pl/woox.php?info3=1&transfer='$transfer'' >/dev/null 2>&1 
