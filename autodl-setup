@@ -80,7 +80,7 @@ RUTORRENT_PLUGINS="$RUTORRENT_PLUGINS rss"
 RUTORRENT_PLUGINS="$RUTORRENT_PLUGINS seedingtime"
 #RUTORRENT_PLUGINS="$RUTORRENT_PLUGINS show_peers_like_wtorrent"
 #RUTORRENT_PLUGINS="$RUTORRENT_PLUGINS source"
-RUTORRENT_PLUGINS="$RUTORRENT_PLUGINS theme"
+# RUTORRENT_PLUGINS="$RUTORRENT_PLUGINS theme"
 RUTORRENT_PLUGINS="$RUTORRENT_PLUGINS throttle"
 RUTORRENT_PLUGINS="$RUTORRENT_PLUGINS tracklabels"
 RUTORRENT_PLUGINS="$RUTORRENT_PLUGINS trafic"
@@ -89,8 +89,8 @@ RUTORRENT_PLUGINS="$RUTORRENT_PLUGINS unpack"
 # For building rtorrent
 LIBCURL_NAME="curl-7.39.0"
 LIBCURL_URL="http://curl.haxx.se/download/$LIBCURL_NAME.tar.gz"
-SIGCPP20_NAME="libsigc++-2.4.0"
-SIGCPP20_URL="http://ftp.gnome.org/pub/GNOME/sources/libsigc++/2.4/$SIGCPP20_NAME.tar.xz"
+SIGCPP20_NAME="libsigc++-2.2.9"
+SIGCPP20_URL="http://ftp.gnome.org/pub/GNOME/sources/libsigc++/2.2/$SIGCPP20_NAME.tar.xz"
 XMLRPC_SVN_DIR="https://svn.code.sf.net/p/xmlrpc-c/code/stable"
 LIBTORRENT_VERSION="0.13.4"
 LIBTORRENT_NAME="libtorrent-$LIBTORRENT_VERSION"
@@ -113,7 +113,7 @@ LIGHTTPD_URL="http://download.lighttpd.net/lighttpd/releases-1.4.x/$LIGHTTPD_NAM
 MOD_SCGI_VERSION="1.14"
 MOD_SCGI_URL="http://python.ca/scgi/releases/scgi-$MOD_SCGI_VERSION.tar.gz"
 
-UNRAR_VERSION="5.0.1"
+UNRAR_VERSION="4.2.4"
 UNRAR_URL="http://www.rarlab.com/rar/unrarsrc-$UNRAR_VERSION.tar.gz"
 
 # Dirs relative to user's home directory
@@ -746,11 +746,7 @@ downloadAndBuild() {
 	cd "$BUILD_DIR"
 	echo "${CMSG}Downloading $prog source code...$CEND"
 	downloadFile "$name.tar.gz" $urls || errorExit "Could not download $prog source code."
-	if [ -f $name.tar.gz ]; then
-	  tar xzf $name.tar.gz
-	elif [ -f $name.tar.xz ] ; then
-	  tar xfJ $name.tar.xz
-	fi
+	tar xzf $name.tar.gz
 
 	if echo "$patchUrl" | grep '^[a-z]*://'; then
 		echo "${CMSG}Patching $prog...$CEND"
