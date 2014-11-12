@@ -746,7 +746,11 @@ downloadAndBuild() {
 	cd "$BUILD_DIR"
 	echo "${CMSG}Downloading $prog source code...$CEND"
 	downloadFile "$name.tar.gz" $urls || errorExit "Could not download $prog source code."
-	tar xzf $name.tar.gz
+	if [ -f $name.tar.gz ]; then
+	  tar xzf $name.tar.gz
+	elif [ -f $name.tar.xz ] ; then
+	  tar xfJ $name.tar.xz
+	fi
 
 	if echo "$patchUrl" | grep '^[a-z]*://'; then
 		echo "${CMSG}Patching $prog...$CEND"
