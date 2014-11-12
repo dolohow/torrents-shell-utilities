@@ -87,10 +87,10 @@ RUTORRENT_PLUGINS="$RUTORRENT_PLUGINS trafic"
 RUTORRENT_PLUGINS="$RUTORRENT_PLUGINS unpack"
 
 # For building rtorrent
-LIBCURL_NAME="curl-7.28.1"
+LIBCURL_NAME="curl-7.39.0"
 LIBCURL_URL="http://curl.haxx.se/download/$LIBCURL_NAME.tar.gz"
-SIGCPP20_NAME="libsigc++-2.3.1"
-SIGCPP20_URL="http://ftp.gnome.org/pub/GNOME/sources/libsigc++/2.3/$SIGCPP20_NAME.tar.gz"
+SIGCPP20_NAME="libsigc++-2.3.2"
+SIGCPP20_URL="http://ftp.gnome.org/pub/GNOME/sources/libsigc++/2.3/$SIGCPP20_NAME.tar.xz"
 XMLRPC_SVN_DIR="https://svn.code.sf.net/p/xmlrpc-c/code/stable"
 LIBTORRENT_VERSION="0.13.4"
 LIBTORRENT_NAME="libtorrent-$LIBTORRENT_VERSION"
@@ -113,7 +113,7 @@ LIGHTTPD_URL="http://download.lighttpd.net/lighttpd/releases-1.4.x/$LIGHTTPD_NAM
 MOD_SCGI_VERSION="1.14"
 MOD_SCGI_URL="http://python.ca/scgi/releases/scgi-$MOD_SCGI_VERSION.tar.gz"
 
-UNRAR_VERSION="4.2.4"
+UNRAR_VERSION="5.0.1"
 UNRAR_URL="http://www.rarlab.com/rar/unrarsrc-$UNRAR_VERSION.tar.gz"
 
 # Dirs relative to user's home directory
