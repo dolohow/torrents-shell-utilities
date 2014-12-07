@@ -10,7 +10,7 @@ check_user() {
         echo "$1 - nie posiada vnc"
         exit
     fi
-    VNCPORT=`ps aux | grep $1 | egrep -o "Xvnc[4]{0,1} \:[0-9]{1,2}" | \
+    VNCPORT=`ps aux | grep $1 | egrep -o "Xtightvnc[4]{0,1} \:[0-9]{1,2}" | \
         awk '{print $2}'`
     ISSTARTED=`pgrep -u $1 vnc | wc -l`
     IP=`ifconfig  | egrep -o "([0-9]{1,3}\.){3}[0-9]{1,3}" | head -n1`
