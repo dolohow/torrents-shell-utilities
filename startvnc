@@ -7,7 +7,7 @@ PATH_SCRIPT="$(readlink -f ${BASH_SOURCE[0]})"
 check_user() {
     HAVEVNC=`cat vnclist | grep -x $1 | wc -l`
     if [ $HAVEVNC = '0' ] ; then
-        echo "$1 - nie posiada vnc"
+        >&2 echo "does not have VNC"
         exit
     fi
     VNCPORT=`ps aux | grep $1 | egrep -o "Xtightvnc[4]{0,1} \:[0-9]{1,2}" | \
@@ -23,12 +23,12 @@ check_user() {
 
 start_VNC() {
     if [ $ISSTARTED != '0' ] ; then
-        echo "$1 - vnc jest już uruchomione"
+        >&2 echo "already running"
     elif [ $DISKQUOTA = '+-' ] ; then
-        echo "$1 - przekroczone miejsce na dysku"
+        >&2 echo "disk quota exceeded"
     else
         su $1 -c "vncserver 2> /dev/null"
-        echo "$1 - vnc zostało prawidłowo uruchomione"
+        echo "success"
         check_user $1
         echo "VNC: $IP$VNCPORT"
     fi
@@ -36,10 +36,10 @@ start_VNC() {
 
 stop_VNC() {
     if [ $ISSTARTED = '0' ] ; then
-        echo "$1 - vnc jest już zatrzymane"
+        >&2 echo "already stopped"
     else
         su $1 -c "vncserver -kill $VNCPORT 2> /dev/null"
-        echo "$1 - vnc zostało zatrzymane"
+        echo "success"
     fi
 }
 
@@ -51,9 +51,9 @@ restart_VNC() {
 
 status_VNC() {
     if [ $ISSTARTED = '0' ] ; then
-        echo "(0) $1"
+        echo "down"
     elif [ $ISSTARTED > '0' ] ; then
-        echo "(1) $1 - $IP$VNCPORT"
+        echo "running"
     fi
 }
 
