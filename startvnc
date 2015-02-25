@@ -28,9 +28,8 @@ start_VNC() {
         >&2 echo "disk quota exceeded"
     else
         su $1 -c "vncserver 2> /dev/null"
-        echo "success"
         check_user $1
-        echo "VNC: $IP$VNCPORT"
+        echo "$IP$VNCPORT"
     fi
 }
 
@@ -53,7 +52,8 @@ status_VNC() {
     if [ $ISSTARTED = '0' ] ; then
         echo "down"
     elif [ $ISSTARTED > '0' ] ; then
-        echo "running"
+        check_user $1
+        echo "$IP$VNCPORT"
     fi
 }
 
