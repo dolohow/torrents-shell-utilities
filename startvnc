@@ -3,6 +3,7 @@
 ACTION=$1
 USER=$2
 PATH_SCRIPT="$(readlink -f ${BASH_SOURCE[0]})"
+HOME_DIR=$(eval echo ~${USER})
 
 check_user() {
     HAVEVNC=`cat vnclist | grep -x $1 | wc -l`
@@ -45,6 +46,7 @@ stop_VNC() {
 restart_VNC() {
     stop_VNC $1
     sleep 2s
+    rm $HOME_DIR/.vnc/*log
     start_VNC $1
 }
 
