@@ -40,6 +40,32 @@ set_rtorrent() {
     ./startrt start $NICK > /dev/null
 }
 
+set_transmission() {
+    PORT=`cat /home*/*/.config/transmission-daemon/settings.json |
+        grep rpc-port |
+        awk 'BEGIN {max=0}
+            {
+                if ($2+0>max)
+                    max=$2+0
+            }
+            END{print max+1}'`
+
+    mkdir -p $DISK/$NICK/{downloads,.config/transmission-daemon}
+
+    sed -e s/USER/$NICK/g \
+        -e s,DISK,$DISK,g \
+        -e s/PORT/$PORT/g \
+        -e s/MAX_ACTIVE/$PROCESS/g \
+        -e s/PASSWORDVALUE/$PASSWORDVALUE/g \
+        transmission/settings.json \
+        > $DISK/$NICK/.config/transmission-daemon/settings.json
+
+    chown root:root $DISK/$NICK/.config/transmission-daemon/settings.json
+    chown -R $NICK:$NICK $DISK/$NICK/downloads
+    chmod 644 $DISK/$NICK/.config/transmission-daemon/settings.json
+    su $NICK -c transmission-daemon
+}
+
 set_deluge() {
     echo "Not implemented yet"
     exit
@@ -62,7 +88,7 @@ set_VNC() {
     cp vnc_files/xscreensaver $DISK/$NICK/.xscreensaver
     cp vnc_files/xstartup $DISK/$NICK/.vnc
     cp vnc_files/kopiowanie $DISK/$NICK/Desktop
-    #cp vnc_files/[^x]* $DISK/$NICK/Desktop
+    cp vnc_files/[^x]* $DISK/$NICK/Desktop
 
     chown -R $NICK:$NICK $DISK/$NICK/.vnc
     chown -R $NICK:$NICK $DISK/$NICK/Desktop/
@@ -108,7 +134,10 @@ set_transfer_limit() {
 
 final() {
     if [ $RTORRENT ] ; then
-        echo "webUI: http://$IP/rutorrent"
+        echo "torrent: http://$IP/rutorrent"
+    fi
+    if [ $TRANSMISSION ] ; then
+        echo "torrent: http://$IP:$PORT"
     fi
     if [ $RAPIDLEECH ] ; then
         echo "Rapidleech: http://$IP/~$NICK/rl"
@@ -117,7 +146,7 @@ final() {
         ./startvnc start $NICK
     fi
     echo "FTP: $IP"
-    echo "panel: http://woox.pl"
+    echo "panel: http://shell.woox.pl"
 }
 
 while [ $# -gt 0 ] ; do
@@ -135,6 +164,11 @@ while [ $# -gt 0 ] ; do
         RTORRENT=y
         PROCESS="$1"
         set_rtorrent
+        shift
+    elif [ "$arg" = "-tr" ] ; then
+        TRANSMISSION=y
+        PROCESS="$1"
+        set_transmission
         shift
     elif [ "$arg" = "-rl" ] ; then
         RAPIDLEECH=y

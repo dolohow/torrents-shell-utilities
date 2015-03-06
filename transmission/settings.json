@@ -1,0 +1,21 @@
+{
+    "cache-size-mb": 8, 
+    "dht-enabled": false, 
+    "download-dir": "DISK/USER/downloads", 
+    "download-queue-enabled": true, 
+    "download-queue-size": MAX_ACTIVE, 
+    "peer-limit-global": 200, 
+    "peer-port-random-on-start": true, 
+    "pex-enabled": false, 
+    "port-forwarding-enabled": false, 
+    "queue-stalled-enabled": false, 
+    "rpc-authentication-required": true, 
+    "rpc-password": "PASSWORDVALUE", 
+    "rpc-port": PORT,  
+    "rpc-username": "USER", 
+    "rpc-whitelist-enabled": false, 
+    "upload-slots-per-torrent": 20, 
+    "utp-enabled": false,
+    "watch-dir": "DISK/USER/", 
+    "watch-dir-enabled": true
+}
