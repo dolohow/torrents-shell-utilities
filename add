@@ -60,9 +60,7 @@ set_transmission() {
         transmission/settings.json \
         > $DISK/$NICK/.config/transmission-daemon/settings.json
 
-    chown root:root $DISK/$NICK/.config/transmission-daemon/settings.json
-    chown -R $NICK:$NICK $DISK/$NICK/downloads
-    chmod 644 $DISK/$NICK/.config/transmission-daemon/settings.json
+    chown -R $NICK:$NICK $DISK/$NICK
     su $NICK -c transmission-daemon
 }
 
