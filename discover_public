@@ -1,0 +1,10 @@
+#!/bin/bash
+SAVEIFS=$IFS
+IFS=$(echo -en "\n\b")
+for file in /home/*/.config/transmission-daemon/torrents/* ; do
+  if [ `transmission-show $file | grep Public | wc -l` != 0 ] ; then
+    echo $file
+    rm $file
+  fi
+done
+
