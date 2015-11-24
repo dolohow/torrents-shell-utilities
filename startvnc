@@ -28,7 +28,7 @@ start_VNC() {
     elif [ $DISKQUOTA = '+-' ] ; then
         >&2 echo "disk quota exceeded"
     else
-        su $1 -c "vncserver 2> /dev/null"
+        su $1 -c "vncserver"
         check_user $1
         echo "$IP$VNCPORT"
     fi
